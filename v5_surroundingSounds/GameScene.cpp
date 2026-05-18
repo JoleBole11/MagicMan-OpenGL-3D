@@ -40,6 +40,10 @@ void GameScene::initialize() {
 	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 	world->setGravity(btVector3(0, -9.81f, 0));
 
+	debug_drawer = new GLDebugDrawer();
+	debug_drawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	world->setDebugDrawer(debug_drawer);
+
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 
 	skull = std::make_unique<GameObject>("Skull");
@@ -218,6 +222,9 @@ void GameScene::game_loop() {
 	update(delta_time);
 	update_physics(delta_time);
 	render();
+
+	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 void GameScene::cleanup()
@@ -226,7 +233,9 @@ void GameScene::cleanup()
 	delete &skull1;
 	delete &rocket;
 	delete &text;
-	delete& camera;
+	delete &camera;
+	delete debug_drawer;
+	debug_drawer = nullptr;
 }
 
 void GameScene::onEnter()

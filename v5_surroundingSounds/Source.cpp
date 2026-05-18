@@ -60,7 +60,6 @@ void game_loop() {
 
 int main(int argv, char** argc) {
     init_glut(argv, argc);
-
     init_game();
 
     glutDisplayFunc(game_loop);
@@ -68,17 +67,13 @@ int main(int argv, char** argc) {
 
     Input::init();
 
-    glutMainLoop();
-    SoundManager::get_instance().release();
-
     SceneManager* sceneManager = SceneManager::getInstance();
-
     sceneManager->addScene("Intro", std::make_unique<IntroScene>());
     sceneManager->addScene("Game", std::make_unique<GameScene>());
-
     sceneManager->changeScene("Intro");
 
     glutMainLoop();
+    SoundManager::get_instance().release();
 
     return 0;
 }

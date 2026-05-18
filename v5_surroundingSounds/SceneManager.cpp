@@ -81,8 +81,9 @@ void SceneManager::game_loop() {
 	update_physics(deltaTime);
     render();
 
-    glutSwapBuffers();
-    glutPostRedisplay();
+    if (currentScene) {
+        currentScene->game_loop();
+    }
 }
 
 void SceneManager::reshape(int width, int height) {

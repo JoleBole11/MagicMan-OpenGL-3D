@@ -32,7 +32,7 @@ void IntroScene::update(float dt) {
     timer += dt;
 
     if (timer >= duration) {
-        SceneManager::getInstance()->changeScene("MainMenu");
+        SceneManager::getInstance()->changeScene("Game");
     }
 
     text->update(dt);
@@ -50,8 +50,6 @@ void IntroScene::render() {
 
     render3d();
     render2d();
-
-    glutSwapBuffers();
 }
 
 void IntroScene::render2d()
@@ -108,6 +106,9 @@ void IntroScene::game_loop()
     update(delta_time);
     update_physics(delta_time);
     render();
+
+    glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 void IntroScene::onEnter() {
