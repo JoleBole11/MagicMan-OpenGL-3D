@@ -2,6 +2,8 @@
 #include "SceneManager.h"
 #include <freeglut.h>
 
+std::unique_ptr<Font> IntroScene::shared_font = nullptr;
+
 IntroScene::IntroScene() : Scene("Intro"), duration(3.0f), timer(0.0f) {
 }
 

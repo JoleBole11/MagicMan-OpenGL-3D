@@ -18,8 +18,9 @@
 #include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
 #include "btBulletDynamicsCommon.h"
 #include "MotionStateObject.h"
-#include "Source.cpp"
 #include "GameInstance.h"
+
+std::unique_ptr<Font> GameScene::shared_font = nullptr;
 
 GameScene::GameScene() : Scene("Game")
 {
@@ -31,6 +32,14 @@ GameScene::~GameScene() {
 }
 
 void GameScene::initialize() {
+	btBroadphaseInterface* broadphase = new btDbvtBroadphase();
+	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver();
+
+	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+	world->setGravity(btVector3(0, -9.81f, 0));
+
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 
 	skull = std::make_unique<GameObject>("Skull");
@@ -223,4 +232,8 @@ void GameScene::cleanup()
 void GameScene::onEnter()
 {
 	GameInstance::getInstance()->setCurrentGameScene(this);
+}
+
+void GameScene::onExit()
+{
 }

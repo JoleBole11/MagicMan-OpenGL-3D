@@ -2,7 +2,6 @@
 #include "Scene.h"
 #include <freeglut.h>
 #include <iostream>
-#include "Source.cpp"
 
 SceneManager* SceneManager::instance = nullptr;
 
@@ -51,7 +50,9 @@ void SceneManager::update(float deltaTime) {
 
 void SceneManager::update_physics(float deltaTime)
 {
-    world->stepSimulation(deltaTime);
+    if (currentScene) {
+        currentScene->update_physics(deltaTime);
+    }
 }
 
 void SceneManager::render() {

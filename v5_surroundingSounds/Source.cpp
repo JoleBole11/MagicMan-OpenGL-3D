@@ -10,14 +10,6 @@
 PFNGLACTIVETEXTUREARBPROC Material::glActiveTextureARB = nullptr;
 PFNGLMULTITEXCOORD2FARBPROC Material::glMultiTexCoord2fARB = nullptr;
 
-btBroadphaseInterface* broadphase;
-btCollisionConfiguration* collision_configuration;
-btCollisionDispatcher* dispatcher;
-btConstraintSolver* solver;
-btDynamicsWorld* world;
-
-GLDebugDrawer* debug_drawer;
-
 glm::vec2 window_size = { 600, 600 };
 glm::vec2 window_position = { 50, 50 };
 glm::vec4 window_color = { 0.2f, 0.4f, 0.65f, 1.0f };
@@ -26,15 +18,7 @@ int delay = 16;
 
 void init_physics()
 {
-    collision_configuration = new btDefaultCollisionConfiguration();
-    dispatcher = new btCollisionDispatcher(collision_configuration);
-    broadphase = new btDbvtBroadphase();
-    solver = new btSequentialImpulseConstraintSolver();
-    world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collision_configuration);
 
-    debug_drawer = new GLDebugDrawer();
-    debug_drawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-    world->setDebugDrawer(debug_drawer);
 }
 
 void init_game() {

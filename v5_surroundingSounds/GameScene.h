@@ -30,6 +30,8 @@ public:
 	float movement_speed = 5.0f;
 	float rotation_speed = 3.0f;
 
+	glm::vec2 window_size = { 600, 600 };
+
 	bool is_cursor_locked = false;
 
 	std::unique_ptr<Camera> camera;
@@ -41,7 +43,13 @@ public:
 
 	static std::unique_ptr<Font> shared_font;
 
-	
+	btBroadphaseInterface* broadphase;
+	btCollisionConfiguration* collision_configuration;
+	btCollisionDispatcher* dispatcher;
+	btConstraintSolver* solver;
+	btDynamicsWorld* world;
+
+	GLDebugDrawer* debug_drawer;
 
 public:
 	GameScene();
