@@ -33,6 +33,12 @@ void RigidBody::init() {
     start.setIdentity();
     start.setOrigin(PhysicsUtilities::glm_to_bt_vec3(t->position));
 
+    {
+        glm::quat rq = t->rotation;
+        btQuaternion btrot(rq.x, rq.y, rq.z, rq.w);
+        start.setRotation(btrot);
+    }
+
     motion_state = new MotionStateObject(start);
 
     btVector3 local_inertia(0, 0, 0);

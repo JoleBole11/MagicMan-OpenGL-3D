@@ -46,32 +46,85 @@ void GameScene::initialize() {
 
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 
-	skull = std::make_unique<GameObject>("Skull");
-	skull->add_component<MeshRenderer>("models/skull/skull_downloadable.obj");
+	treeMap = {
+		{0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1},
+		{1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0},
+		{0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1},
+		{1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0},
+		{0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0},
+		{0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+		{1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+		{0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
+		{1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0},
+		{0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1},
+		{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0},
+		{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1},
+		{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0},
+		{0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+		{1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+		{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+		{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+		{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+		{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+		{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+	};
 
-	auto* t = skull->get_component<Transform>();
-	t->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 1, 0));
-	t->position = glm::vec3(0.0f, 0.0f, -3.0f);
+	for (int i = 0; i < treeMap.size(); i++) {
+		for (int j = 0; j < treeMap[i].size(); j++) {
+			if (treeMap[i][j] == 1) {
+				auto* tree = new GameObject("Tree");
+				tree->add_component<MeshRenderer>("models/tree/tree.obj");
+				auto* t = tree->get_component<Transform>();
+				t->position = glm::vec3((i+1) * 5 - 40, 0.0f, (j+1) * 5 - 40);
+				t->rotation = glm::angleAxis(glm::radians(-45.0f), glm::vec3(0, 0, 0));
+				auto* shape = new btBoxShape(btVector3(0.5f, 5.0f, 0.5f));
+				tree->add_component<RigidBody>(0.0f, shape, world);
+				trees.push_back(tree);
+			}
+		}
+	}
 
-	auto* shape = new btBoxShape(btVector3(1, 1, 1));
-	skull->add_component<RigidBody>(1.0f, shape, world);
+	auto* invisibleWall = new GameObject("InvisibleWall");
+	auto* shape1 = new btBoxShape(btVector3(0.1f, 5.0f, 70.0f));
+	invisibleWall->get_component<Transform>()->position = glm::vec3(-30.0f, 0.0f, 35.0f);
+	invisibleWall->add_component<RigidBody>(0.0f, shape1, world);
+	invisibleWalls.push_back(invisibleWall);
 
-	skull1 = std::make_unique<GameObject>("Skull");
-	skull1->add_component<MeshRenderer>("models/skull/skull_downloadable.obj");
+	auto* invisibleWall1 = new GameObject("InvisibleWall");
+	auto* shape2 = new btBoxShape(btVector3(0.1f, 5.0f, 70.0f));
+	invisibleWall1->get_component<Transform>()->position = glm::vec3(55.0f, 0.0f, 35.0f);
+	invisibleWall1->add_component<RigidBody>(0.0f, shape2, world);
+	invisibleWalls.push_back(invisibleWall1);
 
-	auto* t1 = skull1->get_component<Transform>();
-	t1->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 1, 0));
-	t1->position = glm::vec3(0.0f, -5.0f, -3.0f);
+	auto* invisibleWall2 = new GameObject("InvisibleWall");
+	invisibleWall2->get_component<Transform>()->position = glm::vec3(0.0f, 0.0f, -25.0f);
+	invisibleWall2->get_component<Transform>()->setRotationDegrees(0, 90, 0);
+	auto* shape3 = new btBoxShape(btVector3(0.1f, 5.0f, 70.0f));
+	invisibleWall2->add_component<RigidBody>(0.0f, shape3, world);
+	invisibleWalls.push_back(invisibleWall2);
 
-	auto* shape1 = new btBoxShape(btVector3(1, 1, 1));
-	skull1->add_component<RigidBody>(0.0f, shape1, world);
+	auto* invisibleWall3 = new GameObject("InvisibleWall");
+	auto* shape4 = new btBoxShape(btVector3(0.1f, 5.0f, 70.0f));
+	invisibleWall3->get_component<Transform>()->position = glm::vec3(0.0f, 0.0f, 55.0f);
+	invisibleWall3->get_component<Transform>()->setRotationDegrees(0, 90, 0);
+	invisibleWall3->add_component<RigidBody>(0.0f, shape4, world);
+	invisibleWalls.push_back(invisibleWall3);
+
+	map = std::make_unique<GameObject>("Map");
+	map->add_component<MeshRenderer>("models/map/grassBlock.obj");
+	auto* t = map->get_component<Transform>();
+	t->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 0, 0));
+	t->position = glm::vec3(0.0f, 0.0f, 3.0f);
+	t->scale = glm::vec3(0.7f, 1.0f, 0.7f);
+	auto* shape = new btBoxShape(btVector3(70, 0.1f, 70));
+	map->add_component<RigidBody>(0.0f, shape, world);
 
 	rocket = std::make_unique<GameObject>("Sprite");
 	rocket->add_component<Sprite>("sprites/rocket.png");
-
-	auto* t2 = rocket->get_component<Transform>();
-	if (t2) {
-		t2->scale = glm::vec3(0.3f, 0.3f, 0.3f);
+	auto* tr = rocket->get_component<Transform>();
+	if (tr) {
+		tr->scale = glm::vec3(0.3f, 0.3f, 0.3f);
 	}
 
 	shared_font = std::make_unique<Font>(
@@ -129,8 +182,13 @@ void GameScene::update(float dt) {
 	else if (Input::get_key_down('T'))
 		SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().second_sound, SoundManager::get_instance().surrounding_sounds, glm::vec3(1, 0, 1));
 
-	skull->update(dt);
-	skull1->update(dt);
+	for (auto& tree : trees) {
+		tree->update(dt);
+	}
+	for (auto& wall : invisibleWalls) {
+		wall->update(dt);
+	}
+	map->update(dt);
 	rocket->update(dt);
 	text->update(dt);
 
@@ -190,8 +248,13 @@ void GameScene::render3d() {
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_CULL_FACE);
 
-	skull->render();
-	skull1->render();
+	for (auto& tree : trees) {
+		tree->render();
+	}
+	for (auto& wall : invisibleWalls) {
+		wall->render();
+	}
+	map->render();
 
 	world->debugDrawWorld();
 
@@ -229,11 +292,13 @@ void GameScene::game_loop() {
 
 void GameScene::cleanup()
 {
-	delete &skull;
-	delete &skull1;
+	for (auto& tree : trees) {
+		delete &tree;
+	}
 	delete &rocket;
 	delete &text;
 	delete &camera;
+	delete &map;
 	delete debug_drawer;
 	debug_drawer = nullptr;
 }

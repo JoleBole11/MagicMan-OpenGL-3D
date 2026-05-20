@@ -36,10 +36,14 @@ public:
 
 	std::unique_ptr<Camera> camera;
 
-	std::unique_ptr<GameObject> skull;
-	std::unique_ptr<GameObject> skull1;
+	std::unique_ptr<GameObject> map;
+	std::unique_ptr<GameObject> tree;
 	std::unique_ptr<GameObject> rocket;
 	std::unique_ptr<GameObject> text;
+
+	std::vector<std::vector<int>> treeMap;
+	std::vector<GameObject*> trees;
+	std::vector<GameObject*> invisibleWalls;
 
 	static std::unique_ptr<Font> shared_font;
 
