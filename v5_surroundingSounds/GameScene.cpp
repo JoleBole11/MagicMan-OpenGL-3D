@@ -44,11 +44,13 @@ void GameScene::initialize() {
 	debug_drawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	world->setDebugDrawer(debug_drawer);
 
-	auto* player = new GameObject("Player");
-	auto* playerShape = new btBoxShape(btVector3(0.75f, 2.0f, 0.75f));
-	auto* playerTransform = player->get_component<Transform>();
-	playerTransform->position = glm::vec3(0, 2, 0);
+	player = std::make_unique<GameObject>("Player");
+	auto* playerShape = new btBoxShape(btVector3(0.5f, 1.0f, 0.5f));
+	playerTransform = std::unique_ptr<Transform>(player->get_component<Transform>());
+	playerTransform->position = glm::vec3(3, 0, 3);
 	player->add_component<RigidBody>(1.0f, playerShape, world);
+	playerRb = std::unique_ptr<RigidBody>(player->get_component<RigidBody>());
+	playerRb->get_body()->setAngularFactor(btVector3(0, 0, 0));
 
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 
@@ -154,7 +156,7 @@ void GameScene::move_camera() {
 	float yaw = camera->get_rotation().y + float(-x * rotation_speed * delta_time);
 	float pitch = camera->get_rotation().x + float(-y * rotation_speed * delta_time);
 
-	pitch = glm::clamp(pitch, -359.0f, 359.0f);
+	pitch = glm::clamp(pitch, -70.0f, 70.0f);
 
 	camera->set_rotation(glm::vec3(pitch, yaw, 0.0f));
 }
@@ -164,11 +166,22 @@ void GameScene::move_player()
 	float v = Input::get_axis("Vertical");
 	float h = Input::get_axis("Horizontal");
 
-	playerTransform->position +=
-		camera->get_forward() * v * movement_speed * delta_time
-		+ camera->get_right() * h * movement_speed * delta_time;
+	btRigidBody* body = playerRb->get_body();
 
-	camera->set_position(playerTransform->position + glm::vec3(0, 2.0f, 0));
+	glm::vec3 dir = camera->get_forward() * v + camera->get_right() * h;
+	dir.y = 0.0f;
+
+	btVector3 current_vel = body->getLinearVelocity();
+
+	btVector3 new_vel(
+		dir.x * movement_speed,
+		current_vel.y(),
+		dir.z * movement_speed
+	);
+
+	body->setLinearVelocity(new_vel);
+
+	camera->set_position(playerTransform->position + glm::vec3(0, 1.0f, 0));
 }
 
 void GameScene::update_physics(float delta_time) {
@@ -288,27 +301,21 @@ void GameScene::render() {
 }
 
 void GameScene::game_loop() {
-	float current_time = glutGet(GLUT_ELAPSED_TIME);
-	delta_time = (float)((current_time - previous_time) / 1000);
-	previous_time = current_time;
 
-	update(delta_time);
-	update_physics(delta_time);
-	render();
-
-	glutSwapBuffers();
-	glutPostRedisplay();
 }
 
 void GameScene::cleanup()
 {
 	for (auto& tree : trees) {
-		delete &tree;
+		delete tree;
 	}
-	delete &rocket;
-	delete &text;
-	delete &camera;
-	delete &map;
+	trees.clear();
+
+	for (auto& wall : invisibleWalls) {
+		delete wall;
+	}
+	invisibleWalls.clear();
+
 	delete debug_drawer;
 	debug_drawer = nullptr;
 }

@@ -81,6 +81,8 @@ void SceneManager::game_loop() {
 	update_physics(deltaTime);
     render();
 
+    glutPostRedisplay();
+
     if (currentScene) {
         currentScene->game_loop();
     }

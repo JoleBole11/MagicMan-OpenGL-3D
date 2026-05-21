@@ -28,10 +28,10 @@ public:
     void update(float deltaTime) override;
 	void update_physics(float deltaTime) override;
     void render() override;
+	void game_loop() override;
 	void render2d() override;
 	void render3d() override;
     void cleanup() override;
-	void game_loop() override;
 
     void onEnter() override;
     void onExit() override;

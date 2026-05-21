@@ -38,6 +38,7 @@ public:
 
 	std::unique_ptr<GameObject> player;
 	std::unique_ptr<Transform> playerTransform;
+	std::unique_ptr<RigidBody> playerRb;
 
 	std::unique_ptr<GameObject> map;
 	std::unique_ptr<GameObject> tree;

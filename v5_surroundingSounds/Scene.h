@@ -17,7 +17,7 @@ public:
 	virtual void update_physics(float dt) = 0;
     virtual void render() = 0;
     virtual void cleanup() = 0;
-    virtual void game_loop() = 0;
+	virtual void game_loop() = 0;
     virtual void render2d() = 0;
     virtual void render3d() = 0;
 
