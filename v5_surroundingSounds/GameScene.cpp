@@ -44,6 +44,12 @@ void GameScene::initialize() {
 	debug_drawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	world->setDebugDrawer(debug_drawer);
 
+	auto* player = new GameObject("Player");
+	auto* playerShape = new btBoxShape(btVector3(0.75f, 2.0f, 0.75f));
+	auto* playerTransform = player->get_component<Transform>();
+	playerTransform->position = glm::vec3(0, 2, 0);
+	player->add_component<RigidBody>(1.0f, playerShape, world);
+
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 
 	treeMap = {
@@ -142,17 +148,6 @@ void GameScene::initialize() {
 }
 
 void GameScene::move_camera() {
-	float v = Input::get_axis("Vertical");
-	float h = Input::get_axis("Horizontal");
-
-	glm::vec3 movement =
-		camera->get_forward() * v * movement_speed * delta_time
-		+ camera->get_right() * h * movement_speed * delta_time;
-
-	camera->set_position(
-		camera->get_position() + movement
-	);
-
 	float x = 0.0, y = 0.0;
 	Input::get_mouse_position(&x, &y);
 
@@ -164,6 +159,18 @@ void GameScene::move_camera() {
 	camera->set_rotation(glm::vec3(pitch, yaw, 0.0f));
 }
 
+void GameScene::move_player()
+{
+	float v = Input::get_axis("Vertical");
+	float h = Input::get_axis("Horizontal");
+
+	playerTransform->position +=
+		camera->get_forward() * v * movement_speed * delta_time
+		+ camera->get_right() * h * movement_speed * delta_time;
+
+	camera->set_position(playerTransform->position + glm::vec3(0, 2.0f, 0));
+}
+
 void GameScene::update_physics(float delta_time) {
 
 	world->stepSimulation(delta_time);
@@ -172,6 +179,7 @@ void GameScene::update_physics(float delta_time) {
 void GameScene::update(float dt) {
 
 	move_camera();
+	move_player();
 	camera->update();
 
 	if (Input::get_key_down('E'))
@@ -191,6 +199,7 @@ void GameScene::update(float dt) {
 	map->update(dt);
 	rocket->update(dt);
 	text->update(dt);
+	player->update(dt);
 
 	SoundManager::get_instance().update();
 	SoundManager::get_instance().update_listener(camera->get_position(), camera->get_forward(), camera->get_up());
@@ -255,6 +264,7 @@ void GameScene::render3d() {
 		wall->render();
 	}
 	map->render();
+	player->render();
 
 	world->debugDrawWorld();
 

@@ -36,6 +36,9 @@ public:
 
 	std::unique_ptr<Camera> camera;
 
+	std::unique_ptr<GameObject> player;
+	std::unique_ptr<Transform> playerTransform;
+
 	std::unique_ptr<GameObject> map;
 	std::unique_ptr<GameObject> tree;
 	std::unique_ptr<GameObject> rocket;
@@ -60,6 +63,7 @@ public:
 	~GameScene() override;
 
 	void move_camera();
+	void move_player();
 
 	void initialize() override;
 	void update(float dt) override;
