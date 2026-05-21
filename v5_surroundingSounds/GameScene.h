@@ -20,6 +20,7 @@
 #include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
 #include "btBulletDynamicsCommon.h"
 #include "MotionStateObject.h"
+#include "Player.h"
 
 class GameScene : public Scene
 {
@@ -36,7 +37,7 @@ public:
 
 	std::unique_ptr<Camera> camera;
 
-	std::unique_ptr<GameObject> player;
+	std::unique_ptr<Player> player;
 	std::unique_ptr<Transform> playerTransform;
 	std::unique_ptr<RigidBody> playerRb;
 

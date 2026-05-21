@@ -144,6 +144,7 @@
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="IntroScene.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="RigidBody.h" />
     <ClCompile Include="Scene.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="MotionStateObject.h" />
     <ClInclude Include="PhysicsUtilities.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SoundManager.h" />

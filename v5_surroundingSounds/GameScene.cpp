@@ -44,15 +44,16 @@ void GameScene::initialize() {
 	debug_drawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	world->setDebugDrawer(debug_drawer);
 
-	player = std::make_unique<GameObject>("Player");
+	player = std::make_unique<Player>("Player");
 	auto* playerShape = new btBoxShape(btVector3(0.5f, 1.0f, 0.5f));
 	playerTransform = std::unique_ptr<Transform>(player->get_component<Transform>());
-	playerTransform->position = glm::vec3(3, 0, 3);
+	playerTransform->position = glm::vec3(3, 0.5f, 3);
 	player->add_component<RigidBody>(1.0f, playerShape, world);
 	playerRb = std::unique_ptr<RigidBody>(player->get_component<RigidBody>());
 	playerRb->get_body()->setAngularFactor(btVector3(0, 0, 0));
 
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
+	Input::set_cursor_lock(is_cursor_locked = true);
 
 	treeMap = {
 		{0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1},
@@ -190,7 +191,7 @@ void GameScene::update_physics(float delta_time) {
 }
 
 void GameScene::update(float dt) {
-
+	delta_time = dt;
 	move_camera();
 	move_player();
 	camera->update();
