@@ -37,6 +37,9 @@
     <Filter Include="Header Files\SceneManager\Scenes">
       <UniqueIdentifier>{dd14c677-80fb-43f6-b245-5a7c9c8cc754}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Enums">
+      <UniqueIdentifier>{8d4cffdc-28e8-4e12-867e-5f9d2eaf2d50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -70,6 +73,9 @@
       <Filter>Header Files\utility</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MagicProjectile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -151,6 +157,12 @@
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MagicProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectiles.h">
+      <Filter>Header Files\Enums</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

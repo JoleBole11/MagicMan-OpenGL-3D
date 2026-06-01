@@ -1,13 +1,14 @@
 #pragma once
 #include "Scene.h"
 #include "GameObject.h"
+#include "Player.h"
+#include "RigidBody.h"
+#include "Transform.h"
 #include "Input.h"
 #include <vector>
 #include "SoundManager.h"
-#include "GameObject.h"
 #include "Utilities.h"
 #include "Camera.h"
-#include "Input.h"
 
 #include <iostream>
 #include <glut.h>
@@ -20,7 +21,7 @@
 #include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
 #include "btBulletDynamicsCommon.h"
 #include "MotionStateObject.h"
-#include "Player.h"
+
 
 class GameScene : public Scene
 {
@@ -46,6 +47,8 @@ public:
 	std::unique_ptr<GameObject> rocket;
 	std::unique_ptr<GameObject> text;
 
+	std::unique_ptr<GameObject> MagicProjectile;
+
 	std::vector<std::vector<int>> treeMap;
 	std::vector<GameObject*> trees;
 	std::vector<GameObject*> invisibleWalls;
@@ -66,6 +69,7 @@ public:
 
 	void move_camera();
 	void move_player();
+	void SpawnProjectile();
 
 	void initialize() override;
 	void update(float dt) override;

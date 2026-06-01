@@ -185,6 +185,28 @@ void GameScene::move_player()
 	camera->set_position(playerTransform->position + glm::vec3(0, 1.0f, 0));
 }
 
+void GameScene::SpawnProjectile()
+{
+	auto* projectile = new GameObject("Projectile");
+	projectile->add_component<MeshRenderer>("models/projectiles/MagicProjectile.obj");
+	auto* tp = projectile->get_component<Transform>();
+	tp->rotation = playerTransform->rotation;
+	tp->position = playerTransform->position;
+	tp->scale = glm::vec3(0.5f, 0.5f, 0.5f);
+	auto* projectileShape = new btSphereShape(0.5f);
+	projectile->add_component<RigidBody>(0.0f, projectileShape, world);
+
+	glm::vec3 dir = camera->get_forward() * 10.0f;
+
+	btVector3 velocity(
+		dir.x,
+		dir.y,
+		dir.z
+	);
+
+	projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
+}
+
 void GameScene::update_physics(float delta_time) {
 
 	world->stepSimulation(delta_time);
