@@ -12,6 +12,9 @@ RigidBody::RigidBody(float mass_amount,
     bt_world(bt_world_n) {}
 
 RigidBody::~RigidBody() {
+    if (bt_world && rigid_body) {
+        bt_world->removeRigidBody(rigid_body);
+    }
     delete rigid_body;
     delete motion_state;
 }

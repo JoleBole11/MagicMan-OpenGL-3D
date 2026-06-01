@@ -6,6 +6,7 @@
 #include "SoundManager.h"
 #include "Utilities.h"
 #include "Camera.h"
+#include "Player.h"
 
 #include <iostream>
 #include <glut.h>
@@ -183,33 +184,73 @@ void GameScene::move_player()
 	body->setLinearVelocity(new_vel);
 
 	camera->set_position(playerTransform->position + glm::vec3(0, 1.0f, 0));
+
+	if (player->getFireCooldown() > 0) {
+		player->setFireCooldown(player->getFireCooldown() - delta_time);
+	}
+	if (Input::get_mouse_button_down(0) && player->getFireCooldown() <= 0) {
+		SpawnProjectile();
+		player->setFireCooldown(1.5f);
+	}
 }
 
 void GameScene::SpawnProjectile()
 {
-	auto* projectile = new GameObject("Projectile");
-	projectile->add_component<MeshRenderer>("models/projectiles/MagicProjectile.obj");
-	auto* tp = projectile->get_component<Transform>();
-	tp->rotation = playerTransform->rotation;
-	tp->position = playerTransform->position;
-	tp->scale = glm::vec3(0.5f, 0.5f, 0.5f);
-	auto* projectileShape = new btSphereShape(0.5f);
-	projectile->add_component<RigidBody>(0.0f, projectileShape, world);
+	MagicProjectile* projectile = nullptr;
+	Transform* tp = nullptr;
+	btCollisionShape* projectileShape = nullptr;
+	glm::vec3 dir = camera->get_forward() * 40.0f;
+	btVector3 velocity = btVector3(dir.x, dir.y, dir.z);
 
-	glm::vec3 dir = camera->get_forward() * 10.0f;
+	switch (player->getSelectedWeapon())
+	{
+	case Magic:
+		projectile = new MagicProjectile("Projectile");
+		projectile->add_component<MeshRenderer>("models/projectiles/MagicProjectile.obj");
+		tp = projectile->get_component<Transform>();
+		tp->rotation = camera->get_rotation();
+		tp->position = playerTransform->position + glm::vec3(0, 1.0f, 0);
+		tp->scale = glm::vec3(0.25f, 0.25f, 0.25f);
+		projectileShape = new btSphereShape(0.25f);
+		projectile->add_component<RigidBody>(1.0f, projectileShape, world);
 
-	btVector3 velocity(
-		dir.x,
-		dir.y,
-		dir.z
-	);
+		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
 
-	projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
+		projectiles.push_back(projectile);
+		break;
+	case Freeze:
+		break;
+	case Fireball:
+		break;
+	}
 }
 
 void GameScene::update_physics(float delta_time) {
-
 	world->stepSimulation(delta_time);
+
+	btCollisionObject* playerObj = playerRb->get_body();
+
+	for (auto& projectile : projectiles) {
+		btCollisionObject* projectileObj = projectile->get_component<RigidBody>()->get_body();
+		
+		int numManifolds = world->getDispatcher()->getNumManifolds();
+		for (int i = 0; i < numManifolds; i++) {
+			btPersistentManifold* manifold = world->getDispatcher()->getManifoldByIndexInternal(i);
+			btCollisionObject* objA = (btCollisionObject*)(manifold->getBody0());
+			btCollisionObject* objB = (btCollisionObject*)(manifold->getBody1());
+
+			if (objA == projectileObj || objB == projectileObj) {
+				if ((objA == playerObj || objB == playerObj)) {
+					continue;
+				}
+
+				if (manifold->getNumContacts() > 0) {
+					projectile->setIsAlive(false);
+					break;
+				}
+			}
+		}
+	}
 }
 
 void GameScene::update(float dt) {
@@ -231,6 +272,20 @@ void GameScene::update(float dt) {
 	}
 	for (auto& wall : invisibleWalls) {
 		wall->update(dt);
+	}
+
+	auto it = projectiles.begin();
+	while (it != projectiles.end()) {
+		if (!(*it)->getIsAlive()) {
+			delete* it;
+			it = projectiles.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+	for (auto& projectile : projectiles) {
+		projectile->update(dt);
 	}
 	map->update(dt);
 	rocket->update(dt);
@@ -298,6 +353,9 @@ void GameScene::render3d() {
 	}
 	for (auto& wall : invisibleWalls) {
 		wall->render();
+	}
+	for (auto& projectile : projectiles) {
+		projectile->render();
 	}
 	map->render();
 	player->render();

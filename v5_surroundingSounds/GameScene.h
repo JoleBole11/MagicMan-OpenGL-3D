@@ -1,7 +1,6 @@
 #pragma once
 #include "Scene.h"
 #include "GameObject.h"
-#include "Player.h"
 #include "RigidBody.h"
 #include "Transform.h"
 #include "Input.h"
@@ -9,6 +8,8 @@
 #include "SoundManager.h"
 #include "Utilities.h"
 #include "Camera.h"
+#include "MagicProjectile.h"
+#include "Player.h"
 
 #include <iostream>
 #include <glut.h>
@@ -44,13 +45,13 @@ public:
 
 	std::unique_ptr<GameObject> map;
 	std::unique_ptr<GameObject> tree;
+	std::unique_ptr<MagicProjectile> projectile;
 	std::unique_ptr<GameObject> rocket;
 	std::unique_ptr<GameObject> text;
 
-	std::unique_ptr<GameObject> MagicProjectile;
-
 	std::vector<std::vector<int>> treeMap;
 	std::vector<GameObject*> trees;
+	std::vector<MagicProjectile*> projectiles;
 	std::vector<GameObject*> invisibleWalls;
 
 	static std::unique_ptr<Font> shared_font;

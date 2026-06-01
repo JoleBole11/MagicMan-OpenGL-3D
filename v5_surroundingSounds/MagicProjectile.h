@@ -3,7 +3,15 @@
 class MagicProjectile : public GameObject
 {
 private:
-	float lifetime = 7.0f;
+	float lifetime = 5.0f;
 	float damage = 50.0f;
+	bool isAlive = true;
+
+public:
+	MagicProjectile(const std::string& name) : GameObject(name) {}
+
+	void update(float delta_time);
+	bool getIsAlive() const { return isAlive; }
+	void setIsAlive(bool alive) { isAlive = alive; }
 };
 

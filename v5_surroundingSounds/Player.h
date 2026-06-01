@@ -3,7 +3,6 @@
 #include "Projectiles.h"
 #include "Input.h"
 #include "GameInstance.h"
-#include "GameScene.h"
 
 class Player : public GameObject
 {
@@ -15,8 +14,25 @@ protected:
 public:
 	Player(const std::string& name) : GameObject(name) {}
 
-	void update(float dt);
+	ProjectileType getSelectedWeapon() {
+		return selectedWeapon;
+	}
+	void setSelectedWeapon(ProjectileType weapon) {
+		selectedWeapon = weapon;
+	}
 
-	void FireProjectile();
+	float getFireCooldown() {
+		return fireCooldown;
+	}
+	void setFireCooldown(float cooldown) {
+		fireCooldown = cooldown;
+	}
+
+	float getHealth() {
+		return health;
+	}
+	void setHealth(float h) {
+		health = h;
+	}
 };
 
