@@ -130,6 +130,11 @@ void GameScene::initialize() {
 	auto* shape = new btBoxShape(btVector3(70, 0.1f, 70));
 	map->add_component<RigidBody>(0.0f, shape, world);
 
+	// Spawn initial enemies
+	SpawnEnemy(glm::vec3(10, 0.5f, 10));
+	SpawnEnemy(glm::vec3(-10, 0.5f, -10));
+	SpawnEnemy(glm::vec3(15, 0.5f, -15));
+
 	rocket = std::make_unique<GameObject>("Sprite");
 	rocket->add_component<Sprite>("sprites/rocket.png");
 	auto* tr = rocket->get_component<Transform>();
@@ -151,6 +156,16 @@ void GameScene::initialize() {
 	text->get_component<Transform>()->position = glm::vec3(250.0f, 550.0f, 0.0f);
 }
 
+void GameScene::SpawnEnemy(const glm::vec3& position)
+{
+	auto* enemy = new BasicEnemy("Enemy");
+	auto* enemyShape = new btBoxShape(btVector3(1, 2, 1));
+	enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
+	enemy->get_component<Transform>()->position = position;
+	enemy->add_component<RigidBody>(1.0f, enemyShape, world);
+	enemies.push_back(enemy);
+}
+
 void GameScene::move_camera() {
 	float x = 0.0, y = 0.0;
 	Input::get_mouse_position(&x, &y);
@@ -165,6 +180,7 @@ void GameScene::move_camera() {
 
 void GameScene::move_player()
 {
+	body->activate();
 	float v = Input::get_axis("Vertical");
 	float h = Input::get_axis("Horizontal");
 
@@ -182,7 +198,7 @@ void GameScene::move_player()
 	);
 
 	body->setLinearVelocity(new_vel);
-
+	
 	camera->set_position(playerTransform->position + glm::vec3(0, 1.0f, 0));
 
 	if (player->getFireCooldown() > 0) {
@@ -244,6 +260,21 @@ void GameScene::update_physics(float delta_time) {
 					continue;
 				}
 
+				bool hitEnemy = false;
+				for (auto& enemy : enemies) {
+					btCollisionObject* enemyObj = enemy->get_component<RigidBody>()->get_body();
+					if ((objA == enemyObj || objB == enemyObj)) {
+						enemy->setIsAlive();
+						projectile->setIsAlive(false);
+						hitEnemy = true;
+						break;
+					}
+				}
+
+				if (hitEnemy) {
+					break;
+				}
+
 				if (manifold->getNumContacts() > 0) {
 					projectile->setIsAlive(false);
 					break;
@@ -277,16 +308,33 @@ void GameScene::update(float dt) {
 	auto it = projectiles.begin();
 	while (it != projectiles.end()) {
 		if (!(*it)->getIsAlive()) {
-			delete* it;
+			delete *it;
 			it = projectiles.erase(it);
 		}
 		else {
 			++it;
 		}
 	}
+
 	for (auto& projectile : projectiles) {
 		projectile->update(dt);
 	}
+
+	auto enemyIt = enemies.begin();
+	while (enemyIt != enemies.end()) {
+		if (!(*enemyIt)->getIsAlive()) {
+			delete *enemyIt;
+			enemyIt = enemies.erase(enemyIt);
+		}
+		else {
+			++enemyIt;
+		}
+	}
+
+	for (auto& enemy : enemies) {
+		enemy->update(dt);
+	}
+
 	map->update(dt);
 	rocket->update(dt);
 	text->update(dt);
@@ -357,6 +405,9 @@ void GameScene::render3d() {
 	for (auto& projectile : projectiles) {
 		projectile->render();
 	}
+	for (auto& enemy : enemies) {
+		enemy->render();
+	}
 	map->render();
 	player->render();
 
@@ -396,6 +447,16 @@ void GameScene::cleanup()
 		delete wall;
 	}
 	invisibleWalls.clear();
+
+	for (auto& enemy : enemies) {
+		delete enemy;
+	}
+	enemies.clear();
+
+	for (auto& projectile : projectiles) {
+		delete projectile;
+	}
+	projectiles.clear();
 
 	delete debug_drawer;
 	debug_drawer = nullptr;

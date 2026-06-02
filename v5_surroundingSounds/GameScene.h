@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "MagicProjectile.h"
 #include "Player.h"
+#include "BasicEnemy.h"
 
 #include <iostream>
 #include <glut.h>
@@ -22,6 +23,7 @@
 #include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
 #include "btBulletDynamicsCommon.h"
 #include "MotionStateObject.h"
+
 
 
 class GameScene : public Scene
@@ -45,13 +47,13 @@ public:
 
 	std::unique_ptr<GameObject> map;
 	std::unique_ptr<GameObject> tree;
-	std::unique_ptr<MagicProjectile> projectile;
 	std::unique_ptr<GameObject> rocket;
 	std::unique_ptr<GameObject> text;
 
 	std::vector<std::vector<int>> treeMap;
 	std::vector<GameObject*> trees;
 	std::vector<MagicProjectile*> projectiles;
+	std::vector<BasicEnemy*> enemies;
 	std::vector<GameObject*> invisibleWalls;
 
 	static std::unique_ptr<Font> shared_font;
@@ -71,6 +73,7 @@ public:
 	void move_camera();
 	void move_player();
 	void SpawnProjectile();
+	void SpawnEnemy(const glm::vec3& position);
 
 	void initialize() override;
 	void update(float dt) override;
