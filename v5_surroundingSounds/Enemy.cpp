@@ -8,11 +8,16 @@ int Enemy::getHealth() {
     return health;
 }
 
-void Enemy::takeDamage(int amount) {
-    health -= amount;
+void Enemy::takeDamage(int damage) {
+    health -= damage;
     if (health <= 0) {
         isAlive = false;
     }
+}
+
+int Enemy::getDamage()
+{
+    return damage;
 }
 
 void Enemy::attack() {
@@ -24,4 +29,9 @@ void Enemy::setIsAlive(bool alive) {
 
 bool Enemy::getIsAlive() {
     return isAlive;
+}
+
+float Enemy::getAttackCooldown()
+{
+    return attackCooldown;
 }

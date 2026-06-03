@@ -13,6 +13,10 @@ public:
 
     void init() override {};
 
+    void setText(const std::string& newText) {
+        text = newText;
+    }
+
     void render() override {
         const auto& chars = font->get_characters();
         float x = 0.0f;

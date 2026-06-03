@@ -47,9 +47,12 @@ int BasicEnemy::getHealth()
 	return health;
 }
 
-void BasicEnemy::takeDamage(int amount)
+void BasicEnemy::takeDamage(int damage)
 {
-	health -= amount;
+	health -= damage;
+	if (health <= 0) {
+		isAlive = false;
+	}
 }
 
 void BasicEnemy::attack()

@@ -11,6 +11,7 @@ public:
 	MagicProjectile(const std::string& name) : GameObject(name) {}
 
 	void update(float delta_time);
+	float getDamage() const { return damage; }
 	bool getIsAlive() const { return isAlive; }
 	void setIsAlive(bool alive) { isAlive = alive; }
 };

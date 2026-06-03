@@ -16,9 +16,11 @@ public:
 
 	virtual void update(float delta_time);
 	virtual int getHealth();
-	virtual void takeDamage(int amount);
+	virtual void takeDamage(int damage);
+	virtual int getDamage();
 	virtual void attack();
 	virtual void setIsAlive(bool alive);
 	virtual bool getIsAlive();
+	virtual float getAttackCooldown();
 };
 

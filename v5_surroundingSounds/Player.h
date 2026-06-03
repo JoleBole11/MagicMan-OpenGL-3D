@@ -7,12 +7,15 @@
 class Player : public GameObject
 {
 protected:
-	float health = 100;
+	int health = 100;
 	float fireCooldown = 0;
+	bool isAlive = true;
 	ProjectileType selectedWeapon = Magic;
 		
 public:
 	Player(const std::string& name) : GameObject(name) {}
+
+	void update(float delta_time);
 
 	ProjectileType getSelectedWeapon() {
 		return selectedWeapon;
@@ -28,11 +31,11 @@ public:
 		fireCooldown = cooldown;
 	}
 
-	float getHealth() {
-		return health;
+	bool getIsAlive() {
+		return isAlive;
 	}
-	void setHealth(float h) {
-		health = h;
-	}
+
+	int getHealth() { return health; }
+	void takeDamage(float h);
 };
 

@@ -1,4 +1,4 @@
-#include "GameScene.h"
+﻿#include "GameScene.h"
 #include "Scene.h"
 #include "GameObject.h"
 #include "Input.h"
@@ -53,6 +53,7 @@ void GameScene::initialize() {
 	playerRb = std::unique_ptr<RigidBody>(player->get_component<RigidBody>());
 	playerRb->get_body()->setAngularFactor(btVector3(0, 0, 0));
 	playerRb->get_body()->forceActivationState(DISABLE_DEACTIVATION);
+	playerRb->get_body()->setUserPointer(new PhysicsType{ ObjectType::PLAYER, player.get()});
 
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 	Input::set_cursor_lock(is_cursor_locked = true);
@@ -150,7 +151,7 @@ void GameScene::initialize() {
 	text = std::make_unique<GameObject>("Text");
 	text->add_component<Text>(
 		shared_font.get(),
-		"Print this!",
+		"Health: " + std::to_string(player->getHealth()),
 		glm::vec3(1.0f, 0.84f, 0.0f)
 	);
 	text->get_component<Transform>()->position = glm::vec3(250.0f, 550.0f, 0.0f);
@@ -163,6 +164,7 @@ void GameScene::SpawnEnemy(const glm::vec3& position)
 	enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
 	enemy->get_component<Transform>()->position = position;
 	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+	enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
 
 	PhysicsType* type = new PhysicsType{
 	ObjectType::ENEMY,
@@ -272,39 +274,69 @@ void GameScene::update_physics(float delta_time) {
 
 		auto* dataB = static_cast<PhysicsType*>(objB->getUserPointer());
 
-		if (dataA->type == ObjectType::PROJECTILE || dataB->type == ObjectType::PROJECTILE) {
-			if ((objA == playerObj || objB == playerObj)) {
-				continue;
-			}
-
-			if (dataA->type == ObjectType::ENEMY) {
-				Enemy* enemy = static_cast<Enemy*>(dataA->object);
-				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataB->object);
-
-				enemy->setIsAlive(false);
-				projectile->setIsAlive(false);
-				break;
-			}
-			else if (dataB->type == ObjectType::ENEMY) {
-				Enemy* enemy = static_cast<Enemy*>(dataB->object);
-				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
-
-				enemy->setIsAlive(false);
-				projectile->setIsAlive(false);
-				break;
-			}
-
-			if (manifold->getNumContacts() > 0) {
-				if (dataA->type == ObjectType::PROJECTILE) {
-					MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
-					projectile->setIsAlive(false);
-					break;
+		switch (dataA->type)
+		{
+			case ObjectType::PLAYER:
+				if (dataB->type == ObjectType::PROJECTILE) {
+					continue;
 				}
-				else if (dataB->type == ObjectType::PROJECTILE) {
+
+				if (dataB->type == ObjectType::ENEMY) {
+					
+					Enemy* enemy = static_cast<Enemy*>(dataB->object);
+
+					if (enemy->getAttackCooldown() <= 0) {
+						enemy->attack();
+						player->takeDamage(enemy->getDamage());
+					}
+				}
+				
+				break;
+			case ObjectType::ENEMY:
+				if (dataB->type == ObjectType::PROJECTILE) {
+					Enemy* enemy = static_cast<Enemy*>(dataA->object);
 					MagicProjectile* projectile = static_cast<MagicProjectile*>(dataB->object);
+
+					enemy->takeDamage(projectile->getDamage());
 					projectile->setIsAlive(false);
-					break;
 				}
+
+				if (dataB->type == ObjectType::PLAYER) {
+					Enemy* enemy = static_cast<Enemy*>(dataA->object);
+
+					if (enemy->getAttackCooldown() <= 0) {
+						enemy->attack();
+						player->takeDamage(enemy->getDamage());
+					}
+				}
+
+				break;
+			case ObjectType::PROJECTILE:
+				if (dataB->type == ObjectType::PLAYER) {
+					continue;
+				}
+
+				if (dataB->type == ObjectType::ENEMY) {
+					Enemy* enemy = static_cast<Enemy*>(dataB->object);
+					MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
+
+					enemy->takeDamage(projectile->getDamage());
+					projectile->setIsAlive(false);
+				}
+				break;
+			default:
+				break;
+		}
+		if (manifold->getNumContacts() > 0) {
+			if (dataA->type == ObjectType::PROJECTILE) {
+				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
+				projectile->setIsAlive(false);
+				break;
+			}
+			else if (dataB->type == ObjectType::PROJECTILE) {
+				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataB->object);
+				projectile->setIsAlive(false);
+				break;
 			}
 		}
 	}
@@ -360,6 +392,12 @@ void GameScene::update(float dt) {
 	for (auto& enemy : enemies) {
 		enemy->update(dt);
 	}
+
+	if (!player->getIsAlive()) {
+		exit(0);
+	}
+
+	text->get_component<Text>()->setText("Health: " + std::to_string(player->getHealth()));
 
 	map->update(dt);
 	rocket->update(dt);
