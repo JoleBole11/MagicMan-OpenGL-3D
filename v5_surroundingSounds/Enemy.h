@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Player.h"
 class Enemy : public GameObject
 {
 private:
@@ -7,6 +8,8 @@ private:
 	int damage;
 	float attackCooldown;
 	bool isAlive;
+	Player* player;
+	float moveSpeed;
 public:
 	Enemy() : GameObject() {}
 	Enemy(const std::string& name) : GameObject(name) {}

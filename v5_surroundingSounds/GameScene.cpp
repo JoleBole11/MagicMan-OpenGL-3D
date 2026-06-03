@@ -52,6 +52,7 @@ void GameScene::initialize() {
 	player->add_component<RigidBody>(1.0f, playerShape, world);
 	playerRb = std::unique_ptr<RigidBody>(player->get_component<RigidBody>());
 	playerRb->get_body()->setAngularFactor(btVector3(0, 0, 0));
+	playerRb->get_body()->forceActivationState(DISABLE_DEACTIVATION);
 
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 	Input::set_cursor_lock(is_cursor_locked = true);
@@ -130,7 +131,6 @@ void GameScene::initialize() {
 	auto* shape = new btBoxShape(btVector3(70, 0.1f, 70));
 	map->add_component<RigidBody>(0.0f, shape, world);
 
-	// Spawn initial enemies
 	SpawnEnemy(glm::vec3(10, 0.5f, 10));
 	SpawnEnemy(glm::vec3(-10, 0.5f, -10));
 	SpawnEnemy(glm::vec3(15, 0.5f, -15));
@@ -162,7 +162,8 @@ void GameScene::SpawnEnemy(const glm::vec3& position)
 	auto* enemyShape = new btBoxShape(btVector3(1, 2, 1));
 	enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
 	enemy->get_component<Transform>()->position = position;
-	enemy->add_component<RigidBody>(1.0f, enemyShape, world);
+	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+	enemy->setPlayer(player.get());
 	enemies.push_back(enemy);
 }
 
@@ -180,11 +181,9 @@ void GameScene::move_camera() {
 
 void GameScene::move_player()
 {
-	body->activate();
+	btRigidBody* body = playerRb->get_body();
 	float v = Input::get_axis("Vertical");
 	float h = Input::get_axis("Horizontal");
-
-	btRigidBody* body = playerRb->get_body();
 
 	glm::vec3 dir = camera->get_forward() * v + camera->get_right() * h;
 	dir.y = 0.0f;
@@ -228,7 +227,7 @@ void GameScene::SpawnProjectile()
 		tp->position = playerTransform->position + glm::vec3(0, 1.0f, 0);
 		tp->scale = glm::vec3(0.25f, 0.25f, 0.25f);
 		projectileShape = new btSphereShape(0.25f);
-		projectile->add_component<RigidBody>(1.0f, projectileShape, world);
+		projectile->add_component<RigidBody>(0.1f, projectileShape, world);
 
 		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
 
@@ -264,7 +263,7 @@ void GameScene::update_physics(float delta_time) {
 				for (auto& enemy : enemies) {
 					btCollisionObject* enemyObj = enemy->get_component<RigidBody>()->get_body();
 					if ((objA == enemyObj || objB == enemyObj)) {
-						enemy->setIsAlive();
+						enemy->takeDamage(25);
 						projectile->setIsAlive(false);
 						hitEnemy = true;
 						break;

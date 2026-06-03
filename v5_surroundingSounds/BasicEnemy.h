@@ -1,5 +1,6 @@
 #pragma once
 #include "Enemy.h"
+
 class BasicEnemy : public Enemy
 {
 private:
@@ -7,6 +8,9 @@ private:
 	int damage = 25;
 	float attackCooldown = 2.0f;
 	bool isAlive = true;
+	Player* player = nullptr;
+	float moveSpeed = 3.0f;
+
 public:
 	BasicEnemy(const std::string& name) : Enemy(name) {}
 
@@ -16,5 +20,7 @@ public:
 	void attack() override;
 	void setIsAlive() override { isAlive = false; }
 	bool getIsAlive() override { return isAlive; }
+	
+	void setPlayer(Player* p) { player = p; }
 };
 
