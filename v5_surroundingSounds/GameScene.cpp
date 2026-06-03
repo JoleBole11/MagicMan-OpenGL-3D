@@ -163,6 +163,14 @@ void GameScene::SpawnEnemy(const glm::vec3& position)
 	enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
 	enemy->get_component<Transform>()->position = position;
 	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+
+	PhysicsType* type = new PhysicsType{
+	ObjectType::ENEMY,
+	enemy
+	};
+
+	enemy->get_component<RigidBody>()->get_body()->setUserPointer(type);
+
 	enemy->setPlayer(player.get());
 	enemies.push_back(enemy);
 }
@@ -217,6 +225,8 @@ void GameScene::SpawnProjectile()
 	glm::vec3 dir = camera->get_forward() * 40.0f;
 	btVector3 velocity = btVector3(dir.x, dir.y, dir.z);
 
+	PhysicsType* type = nullptr;
+
 	switch (player->getSelectedWeapon())
 	{
 	case Magic:
@@ -230,6 +240,13 @@ void GameScene::SpawnProjectile()
 		projectile->add_component<RigidBody>(0.1f, projectileShape, world);
 
 		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
+
+		type = new PhysicsType{
+			ObjectType::PROJECTILE,
+			projectile
+		};
+
+		projectile->get_component<RigidBody>()->get_body()->setUserPointer(type);
 
 		projectiles.push_back(projectile);
 		break;
@@ -245,36 +262,46 @@ void GameScene::update_physics(float delta_time) {
 
 	btCollisionObject* playerObj = playerRb->get_body();
 
-	for (auto& projectile : projectiles) {
-		btCollisionObject* projectileObj = projectile->get_component<RigidBody>()->get_body();
-		
-		int numManifolds = world->getDispatcher()->getNumManifolds();
-		for (int i = 0; i < numManifolds; i++) {
-			btPersistentManifold* manifold = world->getDispatcher()->getManifoldByIndexInternal(i);
-			btCollisionObject* objA = (btCollisionObject*)(manifold->getBody0());
-			btCollisionObject* objB = (btCollisionObject*)(manifold->getBody1());
+	int numManifolds = world->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; i++) {
+		btPersistentManifold* manifold = world->getDispatcher()->getManifoldByIndexInternal(i);
+		btCollisionObject* objA = (btCollisionObject*)(manifold->getBody0());
+		btCollisionObject* objB = (btCollisionObject*)(manifold->getBody1());
 
-			if (objA == projectileObj || objB == projectileObj) {
-				if ((objA == playerObj || objB == playerObj)) {
-					continue;
-				}
+		auto* dataA = static_cast<PhysicsType*>(objA->getUserPointer());
 
-				bool hitEnemy = false;
-				for (auto& enemy : enemies) {
-					btCollisionObject* enemyObj = enemy->get_component<RigidBody>()->get_body();
-					if ((objA == enemyObj || objB == enemyObj)) {
-						enemy->takeDamage(25);
-						projectile->setIsAlive(false);
-						hitEnemy = true;
-						break;
-					}
-				}
+		auto* dataB = static_cast<PhysicsType*>(objB->getUserPointer());
 
-				if (hitEnemy) {
+		if (dataA->type == ObjectType::PROJECTILE || dataB->type == ObjectType::PROJECTILE) {
+			if ((objA == playerObj || objB == playerObj)) {
+				continue;
+			}
+
+			if (dataA->type == ObjectType::ENEMY) {
+				Enemy* enemy = static_cast<Enemy*>(dataA->object);
+				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataB->object);
+
+				enemy->setIsAlive(false);
+				projectile->setIsAlive(false);
+				break;
+			}
+			else if (dataB->type == ObjectType::ENEMY) {
+				Enemy* enemy = static_cast<Enemy*>(dataB->object);
+				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
+
+				enemy->setIsAlive(false);
+				projectile->setIsAlive(false);
+				break;
+			}
+
+			if (manifold->getNumContacts() > 0) {
+				if (dataA->type == ObjectType::PROJECTILE) {
+					MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
+					projectile->setIsAlive(false);
 					break;
 				}
-
-				if (manifold->getNumContacts() > 0) {
+				else if (dataB->type == ObjectType::PROJECTILE) {
+					MagicProjectile* projectile = static_cast<MagicProjectile*>(dataB->object);
 					projectile->setIsAlive(false);
 					break;
 				}

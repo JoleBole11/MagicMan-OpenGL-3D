@@ -18,8 +18,8 @@ void Enemy::takeDamage(int amount) {
 void Enemy::attack() {
 }
 
-void Enemy::setIsAlive() {
-    isAlive = false;
+void Enemy::setIsAlive(bool alive) {
+    isAlive = alive;
 }
 
 bool Enemy::getIsAlive() {

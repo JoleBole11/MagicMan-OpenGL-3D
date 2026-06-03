@@ -11,6 +11,8 @@
 #include "MagicProjectile.h"
 #include "Player.h"
 #include "BasicEnemy.h"
+#include "ObjectType.h"
+#include "PhysicsType.h"
 
 #include <iostream>
 #include <glut.h>

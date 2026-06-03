@@ -18,7 +18,7 @@ public:
 	virtual int getHealth();
 	virtual void takeDamage(int amount);
 	virtual void attack();
-	virtual void setIsAlive();
+	virtual void setIsAlive(bool alive);
 	virtual bool getIsAlive();
 };
 

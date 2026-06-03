@@ -173,6 +173,8 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="MotionStateObject.h" />
+    <ClInclude Include="ObjectType.h" />
+    <ClInclude Include="PhysicsType.h" />
     <ClInclude Include="PhysicsUtilities.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Projectiles.h" />

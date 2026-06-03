@@ -18,7 +18,7 @@ public:
 	int getHealth() override;
 	void takeDamage(int amount) override;
 	void attack() override;
-	void setIsAlive() override { isAlive = false; }
+	void setIsAlive(bool alive) override { isAlive = alive; }
 	bool getIsAlive() override { return isAlive; }
 	
 	void setPlayer(Player* p) { player = p; }
