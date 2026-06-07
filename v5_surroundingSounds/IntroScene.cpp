@@ -4,7 +4,7 @@
 
 std::unique_ptr<Font> IntroScene::shared_font = nullptr;
 
-IntroScene::IntroScene() : Scene("Intro"), duration(3.0f), timer(0.0f) {
+IntroScene::IntroScene() : Scene("Intro"), duration(5.0f), timer(0.0f) {
 }
 
 IntroScene::~IntroScene() {
@@ -14,7 +14,7 @@ IntroScene::~IntroScene() {
 void IntroScene::initialize() {
     shared_font = std::make_unique<Font>(
         "fonts/Roboto-Regular.ttf",
-        24
+        36
     );
 
     text = std::make_unique<GameObject>("Text");
@@ -23,7 +23,7 @@ void IntroScene::initialize() {
         "MagicMan by Bogdan Cvetkovic 5934",
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    text->get_component<Transform>()->position = glm::vec3(250.0f, 550.0f, 0.0f);
+    text->get_component<Transform>()->position = glm::vec3(225.0f, 800.0f, 0.0f);
 
     initialized = true;
 }
@@ -32,7 +32,7 @@ void IntroScene::update(float dt) {
     timer += dt;
 
     if (timer >= duration) {
-        SceneManager::getInstance()->changeScene("Game");
+        SceneManager::getInstance()->changeScene("Menu");
     }
 
     text->update(dt);

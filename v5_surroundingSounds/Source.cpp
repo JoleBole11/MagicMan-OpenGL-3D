@@ -6,11 +6,13 @@
 #include "Input.h"
 #include <memory>
 #include <iostream>
+#include "MainMenuScene.h"
 
 PFNGLACTIVETEXTUREARBPROC Material::glActiveTextureARB = nullptr;
 PFNGLMULTITEXCOORD2FARBPROC Material::glMultiTexCoord2fARB = nullptr;
+PlayerPrefs* PlayerPrefs::instance = nullptr;
 
-glm::vec2 window_size = { 600, 600 };
+glm::vec2 window_size = { 1000, 1000 };
 glm::vec2 window_position = { 50, 50 };
 glm::vec4 window_color = { 0.2f, 0.4f, 0.65f, 1.0f };
 
@@ -67,8 +69,11 @@ int main(int argv, char** argc) {
 
     Input::init();
 
+	PlayerPrefs* playerPrefs = PlayerPrefs::getInstance();
+
     SceneManager* sceneManager = SceneManager::getInstance();
     sceneManager->addScene("Intro", std::make_unique<IntroScene>());
+	sceneManager->addScene("Menu", std::make_unique<MainMenuScene>());
     sceneManager->addScene("Game", std::make_unique<GameScene>());
     sceneManager->changeScene("Intro");
 

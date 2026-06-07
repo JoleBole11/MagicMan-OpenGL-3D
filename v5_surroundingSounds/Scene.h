@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "PlayerPrefs.h"
 
 class Scene {
 protected:

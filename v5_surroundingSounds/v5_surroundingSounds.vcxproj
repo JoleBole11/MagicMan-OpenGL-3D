@@ -147,6 +147,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="IntroScene.cpp" />
     <ClCompile Include="MagicProjectile.cpp" />
+    <ClCompile Include="MainMenuScene.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="RigidBody.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="IntroScene.h" />
     <ClInclude Include="MagicProjectile.h" />
+    <ClInclude Include="MainMenuScene.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshRenderer.h" />
@@ -177,6 +179,7 @@
     <ClInclude Include="PhysicsType.h" />
     <ClInclude Include="PhysicsUtilities.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerPrefs.h" />
     <ClInclude Include="Projectiles.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />

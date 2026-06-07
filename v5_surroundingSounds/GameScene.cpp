@@ -1,25 +1,4 @@
 ﻿#include "GameScene.h"
-#include "Scene.h"
-#include "GameObject.h"
-#include "Input.h"
-#include <vector>
-#include "SoundManager.h"
-#include "Utilities.h"
-#include "Camera.h"
-#include "Player.h"
-
-#include <iostream>
-#include <glut.h>
-#include <glm.hpp>
-#include <string.h>
-#include "Sprite.h"
-#include "Text.h"
-
-#include "DebugDrawer.h"
-#include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
-#include "btBulletDynamicsCommon.h"
-#include "MotionStateObject.h"
-#include "GameInstance.h"
 
 std::unique_ptr<Font> GameScene::shared_font = nullptr;
 
@@ -132,9 +111,10 @@ void GameScene::initialize() {
 	auto* shape = new btBoxShape(btVector3(70, 0.1f, 70));
 	map->add_component<RigidBody>(0.0f, shape, world);
 
-	SpawnEnemy(glm::vec3(10, 0.5f, 10));
-	SpawnEnemy(glm::vec3(-10, 0.5f, -10));
-	SpawnEnemy(glm::vec3(15, 0.5f, -15));
+	EnemySpawner(glm::vec3(20, 0.5f, 20));
+	EnemySpawner(glm::vec3(20, 0.5f, -20));
+	EnemySpawner(glm::vec3(-20, 0.5f, 20));
+	EnemySpawner(glm::vec3(-20, 0.5f, -20));
 
 	rocket = std::make_unique<GameObject>("Sprite");
 	rocket->add_component<Sprite>("sprites/rocket.png");
@@ -145,24 +125,40 @@ void GameScene::initialize() {
 
 	shared_font = std::make_unique<Font>(
 		"fonts/Roboto-Regular.ttf",
-		24
+		36
 	);
 
-	text = std::make_unique<GameObject>("Text");
-	text->add_component<Text>(
+	healthText = std::make_unique<GameObject>("healthText");
+	healthText->add_component<Text>(
 		shared_font.get(),
 		"Health: " + std::to_string(player->getHealth()),
-		glm::vec3(1.0f, 0.84f, 0.0f)
+		glm::vec3(1.0f, 0.0f, 0.0f)
 	);
-	text->get_component<Transform>()->position = glm::vec3(250.0f, 550.0f, 0.0f);
+	healthText->get_component<Transform>()->position = glm::vec3(100.0f, 100.0f, 0.0f);
+
+	scoreText = std::make_unique<GameObject>("scoreText");
+	scoreText->add_component<Text>(
+		shared_font.get(),
+		"Score: " + std::to_string(score),
+		glm::vec3(1.0f, 0.0f, 0.0f)
+	);
+	scoreText->get_component<Transform>()->position = glm::vec3(100.0f, 900.0f, 0.0f);
 }
 
-void GameScene::SpawnEnemy(const glm::vec3& position)
+void GameScene::EnemySpawner(const glm::vec3& pos)
+{
+	auto* enemySpawn = new GameObject("EnemySpawn");
+	enemySpawn->get_component<Transform>()->position = pos;
+
+	enemySpawns.push_back(enemySpawn);
+}
+
+void GameScene::SpawnEnemy(const glm::vec3& pos)
 {
 	auto* enemy = new BasicEnemy("Enemy");
-	auto* enemyShape = new btBoxShape(btVector3(1, 2, 1));
+	auto* enemyShape = new btBoxShape(btVector3(1, 1, 1));
 	enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
-	enemy->get_component<Transform>()->position = position;
+	enemy->get_component<Transform>()->position = pos;
 	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
 	enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
 
@@ -215,7 +211,7 @@ void GameScene::move_player()
 	}
 	if (Input::get_mouse_button_down(0) && player->getFireCooldown() <= 0) {
 		SpawnProjectile();
-		player->setFireCooldown(1.5f);
+		player->setFireCooldown(player->getMagicCooldown());
 	}
 }
 
@@ -356,6 +352,15 @@ void GameScene::update(float dt) {
 	else if (Input::get_key_down('T'))
 		SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().second_sound, SoundManager::get_instance().surrounding_sounds, glm::vec3(1, 0, 1));
 
+	if(spawnTime > 0)
+		spawnTime -= dt;
+	else {
+		spawnTime = 7.5f;
+		for (auto& spawn : enemySpawns) {
+			SpawnEnemy(spawn->get_component<Transform>()->position);
+		}
+	}
+
 	for (auto& tree : trees) {
 		tree->update(dt);
 	}
@@ -383,6 +388,7 @@ void GameScene::update(float dt) {
 		if (!(*enemyIt)->getIsAlive()) {
 			delete *enemyIt;
 			enemyIt = enemies.erase(enemyIt);
+			score++;
 		}
 		else {
 			++enemyIt;
@@ -394,14 +400,17 @@ void GameScene::update(float dt) {
 	}
 
 	if (!player->getIsAlive()) {
-		exit(0);
+		PlayerPrefs::getInstance()->addScore(score);
+		SceneManager::getInstance()->changeScene("Menu");
 	}
 
-	text->get_component<Text>()->setText("Health: " + std::to_string(player->getHealth()));
+	healthText->get_component<Text>()->setText("Health: " + std::to_string(player->getHealth()));
+	scoreText->get_component<Text>()->setText("Score: " + std::to_string(score));
 
 	map->update(dt);
 	rocket->update(dt);
-	text->update(dt);
+	healthText->update(dt);
+	scoreText->update(dt);
 	player->update(dt);
 
 	SoundManager::get_instance().update();
@@ -434,9 +443,13 @@ void GameScene::render2d() {
 	tf->rotation = glm::quat{ 1,0,0,0 };
 	rocket->render();
 
-	auto* tf2 = text->get_component<Transform>();
+	auto* tf2 = healthText->get_component<Transform>();
 	tf2->rotation = glm::quat{ 1,0,0,0 };
-	text->render();
+	healthText->render();
+
+	auto* tf3 = scoreText->get_component<Transform>();
+	tf3->rotation = glm::quat{ 1,0,0,0 };
+	scoreText->render();
 
 	glPopMatrix();
 

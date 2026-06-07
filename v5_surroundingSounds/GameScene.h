@@ -26,6 +26,9 @@
 #include "btBulletDynamicsCommon.h"
 #include "MotionStateObject.h"
 
+#include "GameInstance.h"
+#include "SceneManager.h"
+
 
 
 class GameScene : public Scene
@@ -33,11 +36,14 @@ class GameScene : public Scene
 public:
 	float delta_time = 0;
 	float previous_time = 0;
+	float spawnTime = 7.5f;
 
 	float movement_speed = 5.0f;
 	float rotation_speed = 3.0f;
 
-	glm::vec2 window_size = { 600, 600 };
+	int score = 0;
+
+	glm::vec2 window_size = { 1000, 1000 };
 
 	bool is_cursor_locked = false;
 
@@ -50,11 +56,13 @@ public:
 	std::unique_ptr<GameObject> map;
 	std::unique_ptr<GameObject> tree;
 	std::unique_ptr<GameObject> rocket;
-	std::unique_ptr<GameObject> text;
+	std::unique_ptr<GameObject> healthText;
+	std::unique_ptr<GameObject> scoreText;
 
 	std::vector<std::vector<int>> treeMap;
 	std::vector<GameObject*> trees;
 	std::vector<MagicProjectile*> projectiles;
+	std::vector<GameObject*> enemySpawns;
 	std::vector<BasicEnemy*> enemies;
 	std::vector<GameObject*> invisibleWalls;
 
@@ -75,7 +83,8 @@ public:
 	void move_camera();
 	void move_player();
 	void SpawnProjectile();
-	void SpawnEnemy(const glm::vec3& position);
+	void EnemySpawner(const glm::vec3& pos);
+	void SpawnEnemy(const glm::vec3& pos);
 
 	void initialize() override;
 	void update(float dt) override;
