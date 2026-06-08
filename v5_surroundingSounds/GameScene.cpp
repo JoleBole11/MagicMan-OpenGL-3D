@@ -14,6 +14,8 @@ GameScene::~GameScene() {
 void GameScene::initialize() {
 	cleanup();
 
+	SoundManager::get_instance().playSong(SoundManager::get_instance().gameplaySong);
+
 	broadphase = new btDbvtBroadphase();
 	collision_configuration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collision_configuration);
@@ -262,6 +264,7 @@ void GameScene::move_player()
 	}
 	if (Input::get_mouse_button_down(0) && player->getFireCooldown() <= 0) {
 		SpawnProjectile();
+		SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().fireSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
 	}
 }
 
@@ -375,6 +378,8 @@ void GameScene::update_physics(float delta_time) {
 					if (enemy->getAttackCooldown() <= 0) {
 						enemy->attack();
 						player->takeDamage(enemy->getDamage());
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().enemyAttackSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().playerHitSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
 					}
 				}
 				
@@ -387,15 +392,18 @@ void GameScene::update_physics(float delta_time) {
 					if (auto* projectileObj = dynamic_cast<MagicProjectile*>(projectile)) {
 						enemy->takeDamage(projectileObj->getDamage());
 						projectileObj->setIsAlive(false);
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().magicHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 					}
 					else if (auto* projectileObj = dynamic_cast<FreezeProjectile*>(projectile)) {
 						enemy->takeDamage(projectileObj->getDamage());
 						enemy->slowDown();
 						projectileObj->setIsAlive(false);
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().freezeHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 					}
 					else if (auto* projectileObj = dynamic_cast<FireballProjectile*>(projectile)) {
 						enemy->takeDamage(projectileObj->getDamage());
 						projectileObj->setIsAlive(false);
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().fireballHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 					}
 				}
 
@@ -405,6 +413,8 @@ void GameScene::update_physics(float delta_time) {
 					if (enemy->getAttackCooldown() <= 0) {
 						enemy->attack();
 						player->takeDamage(enemy->getDamage());
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().enemyAttackSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().playerHitSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
 					}
 				}
 
@@ -421,15 +431,18 @@ void GameScene::update_physics(float delta_time) {
 					if (auto* projectileObj = dynamic_cast<MagicProjectile*>(projectile)) {
 						enemy->takeDamage(projectileObj->getDamage());
 						projectileObj->setIsAlive(false);
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().magicHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 					}
 					else if (auto* projectileObj = dynamic_cast<FreezeProjectile*>(projectile)) {
 						enemy->takeDamage(projectileObj->getDamage());
 						enemy->slowDown();
 						projectileObj->setIsAlive(false);
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().freezeHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 					}
 					else if (auto* projectileObj = dynamic_cast<FireballProjectile*>(projectile)) {
 						enemy->takeDamage(projectileObj->getDamage());
 						projectileObj->setIsAlive(false);
+						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().fireballHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 					}
 				}
 				break;
@@ -459,11 +472,6 @@ void GameScene::update(float dt) {
 
 	if (Input::get_key_down('E'))
 		Input::set_cursor_lock(is_cursor_locked = !is_cursor_locked);
-
-	if (Input::get_key_down('R'))
-		SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().first_sound, SoundManager::get_instance().surrounding_sounds, glm::vec3(4, 0, 4));
-	else if (Input::get_key_down('T'))
-		SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().second_sound, SoundManager::get_instance().surrounding_sounds, glm::vec3(1, 0, 1));
 
 	if(spawnTime > 0)
 		spawnTime -= dt;
@@ -721,6 +729,8 @@ void GameScene::cleanup()
 		delete debug_drawer;
 		debug_drawer = nullptr;
 	}
+
+	SoundManager::get_instance().stopMusic();
 
 	score = 0;
 	spawnTime = 7.5f;

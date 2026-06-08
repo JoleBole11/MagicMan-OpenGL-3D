@@ -17,10 +17,10 @@ void GameOverScene::initialize()
     loseText = std::make_unique<GameObject>("loseText");
     loseText->add_component<Text>(
         shared_font.get(),
-        "YOU LOSE",
+        "GAME OVER",
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    loseText->get_component<Transform>()->position = glm::vec3(400.0f, 800.0f, 0.0f);
+    loseText->get_component<Transform>()->position = glm::vec3(390.0f, 900.0f, 0.0f);
 
     score = std::make_unique<GameObject>("score");
     score->add_component<Text>(
@@ -28,21 +28,32 @@ void GameOverScene::initialize()
         "Score: " + std::to_string(PlayerPrefs::getInstance()->getLastScore()),
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    score->get_component<Transform>()->position = glm::vec3(400.0f, 450.0f, 0.0f);
+    score->get_component<Transform>()->position = glm::vec3(425.0f, 700.0f, 0.0f);
 
     continueText = std::make_unique<GameObject>("continueText");
     continueText->add_component<Text>(
         shared_font.get(),
-        "Press LMB to continue",
+        "Press LMB to go back to Menu",
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    continueText->get_component<Transform>()->position = glm::vec3(400.0f, 100.0f, 0.0f);
+    continueText->get_component<Transform>()->position = glm::vec3(250.0f, 500.0f, 0.0f);
+
+    restartText = std::make_unique<GameObject>("restartText");
+    restartText->add_component<Text>(
+        shared_font.get(),
+        "Press R to Restart",
+        glm::vec3(1.0f, 0.84f, 0.0f)
+    );
+    restartText->get_component<Transform>()->position = glm::vec3(350.0f, 300.0f, 0.0f);
 }
 
 void GameOverScene::update(float deltaTime)
 {
     if (Input::get_mouse_button_down(0)) {
         SceneManager::getInstance()->changeScene("Menu");
+    }
+    if (Input::get_key_down('r')) {
+        SceneManager::getInstance()->changeScene("Game");
     }
 }
 
@@ -109,6 +120,10 @@ void GameOverScene::render2d()
     tf3->rotation = glm::quat{ 1,0,0,0 };
     continueText->render();
 
+    auto* tf4 = restartText->get_component<Transform>();
+    tf4->rotation = glm::quat{ 1,0,0,0 };
+    restartText->render();
+
     glPopMatrix();
 
     glMatrixMode(GL_PROJECTION);
@@ -129,6 +144,7 @@ void GameOverScene::cleanup()
     score.reset();
     continueText.reset();
     shared_font.reset();
+	restartText.reset();
     initialized = false;
 }
 

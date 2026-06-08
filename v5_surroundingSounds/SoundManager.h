@@ -37,17 +37,31 @@ public:
     }
 
     bool init_audio() {
-    
-        if (!create_sound("sounds/first_sound.wav", FMOD_DEFAULT | FMOD_3D, &first_sound)) return false;
-        if (!create_sound("sounds/second_sound.wav", FMOD_DEFAULT | FMOD_3D, &second_sound)) return false;
+   
+        if (!create_sound("sounds/FireSound.mp3", FMOD_DEFAULT | FMOD_3D, &fireSound)) return false;
+        if (!create_sound("sounds/EnemyAttack.mp3", FMOD_DEFAULT | FMOD_3D, &enemyAttackSound)) return false;
+        if (!create_sound("sounds/EnemyHit.mp3", FMOD_DEFAULT | FMOD_3D, &enemyHitSound)) return false;
+        if (!create_sound("sounds/FireballHit.mp3", FMOD_DEFAULT | FMOD_3D, &fireballHitSound)) return false;
+        if (!create_sound("sounds/FreezeHit.mp3", FMOD_DEFAULT | FMOD_3D, &freezeHitSound)) return false;
+        if (!create_sound("sounds/MagicHit.mp3", FMOD_DEFAULT | FMOD_3D, &magicHitSound)) return false;
+        if (!create_sound("sounds/PlayerHit.mp3", FMOD_DEFAULT | FMOD_3D, &playerHitSound)) return false;
+        if (!create_sound("sounds/Gameplay.mp3", FMOD_LOOP_NORMAL | FMOD_2D, &gameplaySong)) return false;
+        if (!create_sound("sounds/MainMenu.mp3", FMOD_LOOP_NORMAL | FMOD_2D, &mainMenuSong)) return false;
 
         return true;
     }
 
     void release() {
 
-        if (first_sound) first_sound->release();
-        if (second_sound) second_sound->release();
+        if (fireSound) fireSound->release();
+        if (enemyAttackSound) enemyAttackSound->release();
+        if (enemyHitSound) enemyHitSound->release();
+        if (fireballHitSound) fireballHitSound->release();
+        if (freezeHitSound) freezeHitSound->release();
+        if (magicHitSound) magicHitSound->release();
+        if (playerHitSound) playerHitSound->release();
+        if (gameplaySong) gameplaySong->release();
+        if (mainMenuSong) mainMenuSong->release();
 
         if (audio_manager) {
             audio_manager->close();
@@ -67,6 +81,13 @@ public:
         channel->setPaused(false);
     }
 
+    void playSong(FMOD::Sound* song) {
+        musicChannel->stop();
+
+        audio_manager->playSound(song, nullptr, false, &musicChannel);
+        musicChannel->setVolume(0.14f);
+    }
+
     void update_listener(const glm::vec3& pos, const glm::vec3& forward, const glm::vec3& up = { 0,1,0 })
     {
         if (!audio_manager) return;
@@ -83,6 +104,10 @@ public:
         audio_manager->update();
     }
 
+    void stopMusic() {
+        musicChannel->stop();
+    }
+
 public:
     SoundManager() = default;
     ~SoundManager() { release(); }
@@ -92,8 +117,16 @@ public:
 
     FMOD::System* audio_manager = nullptr;
     FMOD::Channel* surrounding_sounds = nullptr;
-    FMOD::Sound* first_sound = nullptr;
-    FMOD::Sound* second_sound = nullptr;
+    FMOD::Channel* musicChannel;
+    FMOD::Sound* fireSound = nullptr;
+    FMOD::Sound* enemyAttackSound = nullptr;
+    FMOD::Sound* enemyHitSound = nullptr;
+    FMOD::Sound* fireballHitSound = nullptr;
+    FMOD::Sound* freezeHitSound = nullptr;
+    FMOD::Sound* magicHitSound = nullptr;
+    FMOD::Sound* playerHitSound = nullptr;
+    FMOD::Sound* gameplaySong = nullptr;
+    FMOD::Sound* mainMenuSong = nullptr;
 private:
     bool create_sound(const char* filePath, FMOD_MODE mode, FMOD::Sound** sound) {
         FMOD_RESULT result = audio_manager->createSound(filePath, mode, nullptr, sound);

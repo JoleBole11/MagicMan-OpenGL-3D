@@ -21,6 +21,7 @@ protected:
 	std::unique_ptr<GameObject> loseText;
 	std::unique_ptr<GameObject> score;
 	std::unique_ptr<GameObject> continueText;
+	std::unique_ptr<GameObject> restartText;
 public:
 	GameOverScene() : Scene("Menu") {}
 	~GameOverScene() override;

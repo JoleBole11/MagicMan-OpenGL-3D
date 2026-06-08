@@ -77,7 +77,7 @@ int main(int argv, char** argc) {
 	sceneManager->addScene("Menu", std::make_unique<MainMenuScene>());
     sceneManager->addScene("Game", std::make_unique<GameScene>());
     sceneManager->addScene("GameOver", std::make_unique<GameOverScene>());
-    sceneManager->changeScene("Intro");
+    sceneManager->changeScene("Menu");
 
     glutMainLoop();
     SoundManager::get_instance().release();

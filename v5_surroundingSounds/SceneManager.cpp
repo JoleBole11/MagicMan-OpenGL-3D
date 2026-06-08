@@ -1,7 +1,9 @@
+#pragma once
 #include "SceneManager.h"
 #include "Scene.h"
 #include <freeglut.h>
 #include <iostream>
+#include "Input.h"
 
 SceneManager* SceneManager::instance = nullptr;
 
@@ -78,7 +80,7 @@ void SceneManager::game_loop() {
     lastTime = currentTime;
 
     update(deltaTime);
-	update_physics(deltaTime);
+    update_physics(deltaTime);
     render();
 
     glutPostRedisplay();
@@ -86,6 +88,8 @@ void SceneManager::game_loop() {
     if (currentScene) {
         currentScene->game_loop();
     }
+
+    Input::update();
 }
 
 void SceneManager::reshape(int width, int height) {

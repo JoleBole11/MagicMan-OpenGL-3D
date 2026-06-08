@@ -1,4 +1,5 @@
 #include "MainMenuScene.h"
+#include "SoundManager.h"
 
 std::unique_ptr<Font> MainMenuScene::shared_font = nullptr;
 
@@ -9,6 +10,8 @@ MainMenuScene::~MainMenuScene()
 
 void MainMenuScene::initialize()
 {
+    SoundManager::get_instance().playSong(SoundManager::get_instance().mainMenuSong);
+
     shared_font = std::make_unique<Font>(
         "fonts/Roboto-Regular.ttf",
         36
@@ -36,7 +39,7 @@ void MainMenuScene::initialize()
         "Press Q to Quit",
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    quitText->get_component<Transform>()->position = glm::vec3(50.0f, 400.0f, 0.0f);
+    quitText->get_component<Transform>()->position = glm::vec3(50.0f, 500.0f, 0.0f);
 
     highScoreText = std::make_unique<GameObject>("highScoreText");
     highScoreText->add_component<Text>(
@@ -44,31 +47,79 @@ void MainMenuScene::initialize()
         "HighScores:",
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    highScoreText->get_component<Transform>()->position = glm::vec3(600.0f, 700.0f, 0.0f);
+    highScoreText->get_component<Transform>()->position = glm::vec3(700.0f, 625.0f, 0.0f);
 
     highScore1 = std::make_unique<GameObject>("highScore1");
     highScore1->add_component<Text>(
         shared_font.get(),
-        "1. " + std::to_string(PlayerPrefs::getInstance()->getHighScore(0)) + "\n",
+        "1. " + std::to_string(PlayerPrefs::getInstance()->getHighScore(0)),
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    highScore1->get_component<Transform>()->position = glm::vec3(600.0f, 650, 0.0f);
+    highScore1->get_component<Transform>()->position = glm::vec3(700.0f, 575, 0.0f);
 
     highScore2 = std::make_unique<GameObject>("highScore2");
     highScore2->add_component<Text>(
         shared_font.get(),
-        "2. " + std::to_string(PlayerPrefs::getInstance()->getHighScore(1)) + "\n",
+        "2. " + std::to_string(PlayerPrefs::getInstance()->getHighScore(1)),
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    highScore2->get_component<Transform>()->position = glm::vec3(600.0f, 600, 0.0f);
+    highScore2->get_component<Transform>()->position = glm::vec3(700.0f, 525, 0.0f);
 
     highScore3 = std::make_unique<GameObject>("highScore3");
     highScore3->add_component<Text>(
         shared_font.get(),
-        "3. " + std::to_string(PlayerPrefs::getInstance()->getHighScore(2)) + "\n",
+        "3. " + std::to_string(PlayerPrefs::getInstance()->getHighScore(2)),
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
-    highScore3->get_component<Transform>()->position = glm::vec3(600.0f, 550, 0.0f);
+    highScore3->get_component<Transform>()->position = glm::vec3(700.0f, 475, 0.0f);
+
+    controlsText = std::make_unique<GameObject>("controlsText");
+    controlsText->add_component<Text>(
+        shared_font.get(),
+        "Controls:",
+        glm::vec3(1.0f, 0.84f, 0.0f)
+    );
+    controlsText->get_component<Transform>()->position = glm::vec3(50.0f, 300.0f, 0.0f);
+
+    magicText = std::make_unique<GameObject>("magicText");
+    magicText->add_component<Text>(
+        shared_font.get(),
+        "Press 1 to select Magic Projectile",
+        glm::vec3(1.0f, 0.84f, 0.0f)
+    );
+    magicText->get_component<Transform>()->position = glm::vec3(50.0f, 250.0f, 0.0f);
+
+    freezeText = std::make_unique<GameObject>("freezeText");
+    freezeText->add_component<Text>(
+        shared_font.get(),
+        "Press 2 to select Freeze Projectile",
+        glm::vec3(1.0f, 0.84f, 0.0f)
+    );
+    freezeText->get_component<Transform>()->position = glm::vec3(50.0f, 200.0f, 0.0f);
+
+    fireballText = std::make_unique<GameObject>("fireballText");
+    fireballText->add_component<Text>(
+        shared_font.get(),
+        "Press 3 to select Fireball Projectile",
+        glm::vec3(1.0f, 0.84f, 0.0f)
+    );
+    fireballText->get_component<Transform>()->position = glm::vec3(50.0f, 150.0f, 0.0f);
+
+    moveText = std::make_unique<GameObject>("moveText");
+    moveText->add_component<Text>(
+        shared_font.get(),
+        "WASD to Move",
+        glm::vec3(1.0f, 0.84f, 0.0f)
+    );
+    moveText->get_component<Transform>()->position = glm::vec3(50.0f, 100.0f, 0.0f);
+
+    fireText = std::make_unique<GameObject>("fireText");
+    fireText->add_component<Text>(
+        shared_font.get(),
+        "Press LMB to Fire",
+        glm::vec3(1.0f, 0.84f, 0.0f)
+    );
+    fireText->get_component<Transform>()->position = glm::vec3(50.0f, 50.0f, 0.0f);
 
     initialized = true;
 }
@@ -155,6 +206,24 @@ void MainMenuScene::render2d()
     auto* tf7 = highScore3->get_component<Transform>();
     tf7->rotation = glm::quat{ 1,0,0,0 };
     highScore3->render();
+    auto* tf8 = controlsText->get_component<Transform>();
+    tf8->rotation = glm::quat{ 1,0,0,0 };
+    controlsText->render();
+    auto* tf9 = magicText->get_component<Transform>();
+    tf9->rotation = glm::quat{ 1,0,0,0 };
+    magicText->render();
+    auto* tf10 = freezeText->get_component<Transform>();
+    tf10->rotation = glm::quat{ 1,0,0,0 };
+    freezeText->render();
+    auto* tf11 = fireballText->get_component<Transform>();
+    tf11->rotation = glm::quat{ 1,0,0,0 };
+    fireballText->render();
+    auto* tf12 = moveText->get_component<Transform>();
+    tf12->rotation = glm::quat{ 1,0,0,0 };
+    moveText->render();
+    auto* tf13 = fireText->get_component<Transform>();
+    tf13->rotation = glm::quat{ 1,0,0,0 };
+    fireText->render();
 
     glPopMatrix();
 
@@ -180,6 +249,15 @@ void MainMenuScene::cleanup()
     highScore2.reset();
     highScore3.reset();
     shared_font.reset();
+    controlsText.reset();
+    magicText.reset();
+	freezeText.reset();
+    fireballText.reset();
+    moveText.reset();
+    fireText.reset();
+
+    SoundManager::get_instance().stopMusic();
+
     initialized = false;
 }
 
@@ -192,4 +270,5 @@ void MainMenuScene::onEnter()
 
 void MainMenuScene::onExit()
 {
+    cleanup();
 }

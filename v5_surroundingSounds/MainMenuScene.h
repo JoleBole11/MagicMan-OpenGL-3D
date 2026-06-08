@@ -26,6 +26,12 @@ protected:
 	std::unique_ptr<GameObject> highScore1;
 	std::unique_ptr<GameObject> highScore2;
 	std::unique_ptr<GameObject> highScore3;
+	std::unique_ptr<GameObject> controlsText;
+	std::unique_ptr<GameObject> magicText;
+	std::unique_ptr<GameObject> freezeText;
+	std::unique_ptr<GameObject> fireballText;
+	std::unique_ptr<GameObject> moveText;
+	std::unique_ptr<GameObject> fireText;
 public:
 	MainMenuScene() : Scene("Menu") {}
 	~MainMenuScene() override;
