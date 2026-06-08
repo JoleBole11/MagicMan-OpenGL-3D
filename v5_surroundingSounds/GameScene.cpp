@@ -226,48 +226,6 @@ void GameScene::SpawnEnemy(const glm::vec3& pos)
 	}
 }
 
-void GameScene::move_camera() {
-	float x = 0.0, y = 0.0;
-	Input::get_mouse_position(&x, &y);
-
-	float yaw = camera->get_rotation().y + float(-x * rotation_speed * delta_time);
-	float pitch = camera->get_rotation().x + float(-y * rotation_speed * delta_time);
-
-	pitch = glm::clamp(pitch, -70.0f, 70.0f);
-
-	camera->set_rotation(glm::vec3(pitch, yaw, 0.0f));
-}
-
-void GameScene::move_player()
-{
-	btRigidBody* body = playerRb->get_body();
-	float v = Input::get_axis("Vertical");
-	float h = Input::get_axis("Horizontal");
-
-	glm::vec3 dir = camera->get_forward() * v + camera->get_right() * h;
-	dir.y = 0.0f;
-
-	btVector3 current_vel = body->getLinearVelocity();
-
-	btVector3 new_vel(
-		dir.x * movement_speed,
-		current_vel.y(),
-		dir.z * movement_speed
-	);
-
-	body->setLinearVelocity(new_vel);
-	
-	camera->set_position(playerTransform->position + glm::vec3(0, 1.0f, 0));
-
-	if (player->getFireCooldown() > 0) {
-		player->setFireCooldown(player->getFireCooldown() - delta_time);
-	}
-	if (Input::get_mouse_button_down(0) && player->getFireCooldown() <= 0) {
-		SpawnProjectile();
-		SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().fireSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
-	}
-}
-
 void GameScene::SpawnProjectile()
 {
 	Projectile* projectile = nullptr;
@@ -466,8 +424,7 @@ void GameScene::update_physics(float delta_time) {
 
 void GameScene::update(float dt) {
 	delta_time = dt;
-	move_camera();
-	move_player();
+	player->handleInput(camera.get(), world, projectiles, delta_time);
 	camera->update();
 
 	if (Input::get_key_down('E'))

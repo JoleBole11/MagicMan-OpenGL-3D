@@ -108,7 +108,6 @@ public:
         musicChannel->stop();
     }
 
-public:
     SoundManager() = default;
     ~SoundManager() { release(); }
 

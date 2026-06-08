@@ -42,9 +42,6 @@ public:
 	float previous_time = 0;
 	float spawnTime = 7.5f;
 
-	float movement_speed = 5.0f;
-	float rotation_speed = 3.0f;
-
 	int score = 0;
 	int randomNum = 0;
 
@@ -88,8 +85,6 @@ public:
 	GameScene();
 	~GameScene() override;
 
-	void move_camera();
-	void move_player();
 	void SpawnProjectile();
 	void EnemySpawner(const glm::vec3& pos);
 	void SpawnEnemy(const glm::vec3& pos);
