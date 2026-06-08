@@ -1,10 +1,6 @@
-#include "BasicEnemy.h"
-#include "Player.h"
-#include "Transform.h"
-#include "RigidBody.h"
-#include <glm.hpp>
+#include "HeavyEnemy.h"
 
-void BasicEnemy::update(float delta_time)
+void HeavyEnemy::update(float delta_time)
 {
 	Enemy::update(delta_time);
 
@@ -43,7 +39,7 @@ void BasicEnemy::update(float delta_time)
 				slowDownTimer -= delta_time;
 				if (slowDownTimer <= 0) {
 					isSlowed = false;
-					moveSpeed = 3.25f;
+					moveSpeed = 2.25f;
 				}
 				btVector3 new_vel(
 					direction.x * moveSpeed,
@@ -58,12 +54,12 @@ void BasicEnemy::update(float delta_time)
 	}
 }
 
-int BasicEnemy::getHealth()
+int HeavyEnemy::getHealth()
 {
 	return health;
 }
 
-void BasicEnemy::takeDamage(int damage)
+void HeavyEnemy::takeDamage(int damage)
 {
 	health -= damage;
 	if (health <= 0) {
@@ -71,18 +67,18 @@ void BasicEnemy::takeDamage(int damage)
 	}
 }
 
-void BasicEnemy::attack()
+void HeavyEnemy::attack()
 {
-	attackCooldown = 2.0f;
+	attackCooldown = 3.0f;
 }
 
-void BasicEnemy::setPlayer(Player* p)
+void HeavyEnemy::setPlayer(Player* p)
 {
 	player = p;
 }
 
-void BasicEnemy::slowDown()
+void HeavyEnemy::slowDown()
 {
 	slowDownTimer = 3.0f;
-	moveSpeed = 2.0f;
+	moveSpeed = 1.25f;
 }

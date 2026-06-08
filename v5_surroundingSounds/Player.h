@@ -9,19 +9,19 @@ class Player : public GameObject
 protected:
 	int health = 100;
 	float fireCooldown = 0;
-	float magicCooldown = 0.75f;
+	float magicCooldown = 0.5f;
 	float freezeCooldown = 0.75f;
 	float fireballCooldown = 1.75f;
 	bool isAlive = true;
-	ProjectileType selectedWeapon = Magic;
+	ProjectileTypes selectedWeapon = Magic;
 		
 public:
 	Player(const std::string& name) : GameObject(name) {}
 
 	void update(float delta_time);
 
-	ProjectileType getSelectedWeapon();
-	void setSelectedWeapon(ProjectileType weapon);
+	ProjectileTypes getSelectedWeapon();
+	void setSelectedWeapon(ProjectileTypes weapon);
 	float getFireCooldown();
 	void setFireCooldown(float cooldown);
 	bool getIsAlive();

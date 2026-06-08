@@ -35,3 +35,14 @@ float Enemy::getAttackCooldown()
 {
     return attackCooldown;
 }
+
+void Enemy::setPlayer(Player* p)
+{
+    player = p;
+}
+
+void Enemy::slowDown()
+{
+	moveSpeed = 1.0f;
+	slowDownTimer = 2.5f;
+}

@@ -12,12 +12,14 @@ GameScene::~GameScene() {
 }
 
 void GameScene::initialize() {
-	btBroadphaseInterface* broadphase = new btDbvtBroadphase();
-	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
-	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
-	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver();
+	cleanup();
 
-	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+	broadphase = new btDbvtBroadphase();
+	collision_configuration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collision_configuration);
+	solver = new btSequentialImpulseConstraintSolver();
+
+	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collision_configuration);
 	world->setGravity(btVector3(0, -9.81f, 0));
 
 	debug_drawer = new GLDebugDrawer();
@@ -26,10 +28,10 @@ void GameScene::initialize() {
 
 	player = std::make_unique<Player>("Player");
 	auto* playerShape = new btBoxShape(btVector3(0.5f, 1.0f, 0.5f));
-	playerTransform = std::unique_ptr<Transform>(player->get_component<Transform>());
+	playerTransform = player->get_component<Transform>();
 	playerTransform->position = glm::vec3(3, 0.5f, 3);
 	player->add_component<RigidBody>(1.0f, playerShape, world);
-	playerRb = std::unique_ptr<RigidBody>(player->get_component<RigidBody>());
+	playerRb = player->get_component<RigidBody>();
 	playerRb->get_body()->setAngularFactor(btVector3(0, 0, 0));
 	playerRb->get_body()->forceActivationState(DISABLE_DEACTIVATION);
 	playerRb->get_body()->setUserPointer(new PhysicsType{ ObjectType::PLAYER, player.get()});
@@ -123,6 +125,31 @@ void GameScene::initialize() {
 		tr->scale = glm::vec3(0.3f, 0.3f, 0.3f);
 	}
 
+	magicImg = std::make_unique<GameObject>("Sprite");
+	magicImg->add_component<Sprite>("sprites/magic.png");
+	auto* tm = magicImg->get_component<Transform>();
+	if (tm) {
+		tm->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+	}
+	magicImg->get_component<Transform>()->position = glm::vec3(375.0f, 75.0f, 0.0f);
+
+	freezeImg = std::make_unique<GameObject>("Sprite");
+	freezeImg->add_component<Sprite>("sprites/freeze.png");
+	auto* tf = freezeImg->get_component<Transform>();
+	if (tf) {
+		tf->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+	}
+	freezeImg->get_component<Transform>()->position = glm::vec3(500.0f, 75.0f, 0.0f);
+
+	fireballImg = std::make_unique<GameObject>("Sprite");
+	fireballImg->add_component<Sprite>("sprites/fireball.png");
+	auto* tf2 = fireballImg->get_component<Transform>();
+	if (tf2) {
+		tf2->scale = glm::vec3(0.0325f, 0.045f, 0.05f);
+	}
+	fireballImg->get_component<Transform>()->position = glm::vec3(640.0f, 75.0f, 0.0f);
+
+
 	shared_font = std::make_unique<Font>(
 		"fonts/Roboto-Regular.ttf",
 		36
@@ -155,22 +182,46 @@ void GameScene::EnemySpawner(const glm::vec3& pos)
 
 void GameScene::SpawnEnemy(const glm::vec3& pos)
 {
-	auto* enemy = new BasicEnemy("Enemy");
-	auto* enemyShape = new btBoxShape(btVector3(1, 1, 1));
-	enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
-	enemy->get_component<Transform>()->position = pos;
-	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
-	enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
+	randomNum = (rand() % 6) + 1;
 
-	PhysicsType* type = new PhysicsType{
-	ObjectType::ENEMY,
-	enemy
-	};
+	if (randomNum <= 5) {
+		auto* enemy = new BasicEnemy("Enemy");
+		auto* enemyShape = new btBoxShape(btVector3(1, 1, 1));
+		enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
+		enemy->get_component<Transform>()->position = pos;
+		enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+		enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
+		enemy->get_component<Transform>()->scale = glm::vec3(0.5f, 0.5f, 0.5f);
 
-	enemy->get_component<RigidBody>()->get_body()->setUserPointer(type);
+		PhysicsType* type = new PhysicsType{
+		ObjectType::ENEMY,
+		enemy
+		};
 
-	enemy->setPlayer(player.get());
-	enemies.push_back(enemy);
+		enemy->get_component<RigidBody>()->get_body()->setUserPointer(type);
+
+		enemy->setPlayer(player.get());
+		enemies.push_back(enemy);
+	}
+	else {
+		auto* enemy = new HeavyEnemy("Enemy");
+		auto* enemyShape = new btBoxShape(btVector3(1, 1, 1));
+		enemy->add_component<MeshRenderer>("models/enemies/heavyEnemy.obj");
+		enemy->get_component<Transform>()->position = pos;
+		enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+		enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
+		enemy->get_component<Transform>()->scale = glm::vec3(0.5f, 0.5f, 0.5f);
+
+		PhysicsType* type = new PhysicsType{
+		ObjectType::ENEMY,
+		enemy
+		};
+
+		enemy->get_component<RigidBody>()->get_body()->setUserPointer(type);
+
+		enemy->setPlayer(player.get());
+		enemies.push_back(enemy);
+	}
 }
 
 void GameScene::move_camera() {
@@ -211,19 +262,18 @@ void GameScene::move_player()
 	}
 	if (Input::get_mouse_button_down(0) && player->getFireCooldown() <= 0) {
 		SpawnProjectile();
-		player->setFireCooldown(player->getMagicCooldown());
 	}
 }
 
 void GameScene::SpawnProjectile()
 {
-	MagicProjectile* projectile = nullptr;
+	Projectile* projectile = nullptr;
 	Transform* tp = nullptr;
 	btCollisionShape* projectileShape = nullptr;
 	glm::vec3 dir = camera->get_forward() * 40.0f;
 	btVector3 velocity = btVector3(dir.x, dir.y, dir.z);
 
-	PhysicsType* type = nullptr;
+	PhysicsType* physicsType = nullptr;
 
 	switch (player->getSelectedWeapon())
 	{
@@ -239,18 +289,59 @@ void GameScene::SpawnProjectile()
 
 		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
 
-		type = new PhysicsType{
+		physicsType = new PhysicsType{
 			ObjectType::PROJECTILE,
 			projectile
 		};
 
-		projectile->get_component<RigidBody>()->get_body()->setUserPointer(type);
+		projectile->get_component<RigidBody>()->get_body()->setUserPointer(physicsType);
 
 		projectiles.push_back(projectile);
+		player->setFireCooldown(player->getMagicCooldown());
 		break;
 	case Freeze:
+		projectile = new FreezeProjectile("Projectile");
+		projectile->add_component<MeshRenderer>("models/projectiles/FreezeProjectile.obj");
+		tp = projectile->get_component<Transform>();
+		tp->rotation = camera->get_rotation();
+		tp->position = playerTransform->position + glm::vec3(0, 1.0f, 0);
+		tp->scale = glm::vec3(0.25f, 0.25f, 0.25f);
+		projectileShape = new btSphereShape(0.25f);
+		projectile->add_component<RigidBody>(0.1f, projectileShape, world);
+
+		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
+
+		physicsType = new PhysicsType{
+			ObjectType::PROJECTILE,
+			projectile
+		};
+
+		projectile->get_component<RigidBody>()->get_body()->setUserPointer(physicsType);
+
+		projectiles.push_back(projectile);
+		player->setFireCooldown(player->getFreezeCooldown());
 		break;
 	case Fireball:
+		projectile = new FireballProjectile("Projectile");
+		projectile->add_component<MeshRenderer>("models/projectiles/FireballProjectile.obj");
+		tp = projectile->get_component<Transform>();
+		tp->rotation = camera->get_rotation();
+		tp->position = playerTransform->position + glm::vec3(0, 1.0f, 0);
+		tp->scale = glm::vec3(0.25f, 0.25f, 0.25f);
+		projectileShape = new btSphereShape(0.25f);
+		projectile->add_component<RigidBody>(0.1f, projectileShape, world);
+
+		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
+
+		physicsType = new PhysicsType{
+			ObjectType::PROJECTILE,
+			projectile
+		};
+
+		projectile->get_component<RigidBody>()->get_body()->setUserPointer(physicsType);
+
+		projectiles.push_back(projectile);
+		player->setFireCooldown(player->getFireballCooldown());
 		break;
 	}
 }
@@ -260,7 +351,7 @@ void GameScene::update_physics(float delta_time) {
 
 	btCollisionObject* playerObj = playerRb->get_body();
 
-	int numManifolds = world->getDispatcher()->getNumManifolds();
+	int numManifolds = world ? world->getDispatcher()->getNumManifolds() : 0;
 	for (int i = 0; i < numManifolds; i++) {
 		btPersistentManifold* manifold = world->getDispatcher()->getManifoldByIndexInternal(i);
 		btCollisionObject* objA = (btCollisionObject*)(manifold->getBody0());
@@ -291,10 +382,21 @@ void GameScene::update_physics(float delta_time) {
 			case ObjectType::ENEMY:
 				if (dataB->type == ObjectType::PROJECTILE) {
 					Enemy* enemy = static_cast<Enemy*>(dataA->object);
-					MagicProjectile* projectile = static_cast<MagicProjectile*>(dataB->object);
+					Projectile* projectile = static_cast<Projectile*>(dataB->object);
 
-					enemy->takeDamage(projectile->getDamage());
-					projectile->setIsAlive(false);
+					if (auto* projectileObj = dynamic_cast<MagicProjectile*>(projectile)) {
+						enemy->takeDamage(projectileObj->getDamage());
+						projectileObj->setIsAlive(false);
+					}
+					else if (auto* projectileObj = dynamic_cast<FreezeProjectile*>(projectile)) {
+						enemy->takeDamage(projectileObj->getDamage());
+						enemy->slowDown();
+						projectileObj->setIsAlive(false);
+					}
+					else if (auto* projectileObj = dynamic_cast<FireballProjectile*>(projectile)) {
+						enemy->takeDamage(projectileObj->getDamage());
+						projectileObj->setIsAlive(false);
+					}
 				}
 
 				if (dataB->type == ObjectType::PLAYER) {
@@ -316,8 +418,19 @@ void GameScene::update_physics(float delta_time) {
 					Enemy* enemy = static_cast<Enemy*>(dataB->object);
 					MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
 
-					enemy->takeDamage(projectile->getDamage());
-					projectile->setIsAlive(false);
+					if (auto* projectileObj = dynamic_cast<MagicProjectile*>(projectile)) {
+						enemy->takeDamage(projectileObj->getDamage());
+						projectileObj->setIsAlive(false);
+					}
+					else if (auto* projectileObj = dynamic_cast<FreezeProjectile*>(projectile)) {
+						enemy->takeDamage(projectileObj->getDamage());
+						enemy->slowDown();
+						projectileObj->setIsAlive(false);
+					}
+					else if (auto* projectileObj = dynamic_cast<FireballProjectile*>(projectile)) {
+						enemy->takeDamage(projectileObj->getDamage());
+						projectileObj->setIsAlive(false);
+					}
 				}
 				break;
 			default:
@@ -325,12 +438,12 @@ void GameScene::update_physics(float delta_time) {
 		}
 		if (manifold->getNumContacts() > 0) {
 			if (dataA->type == ObjectType::PROJECTILE) {
-				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
+				Projectile* projectile = static_cast<Projectile*>(dataA->object);
 				projectile->setIsAlive(false);
 				break;
 			}
 			else if (dataB->type == ObjectType::PROJECTILE) {
-				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataB->object);
+				Projectile* projectile = static_cast<Projectile*>(dataB->object);
 				projectile->setIsAlive(false);
 				break;
 			}
@@ -401,17 +514,37 @@ void GameScene::update(float dt) {
 
 	if (!player->getIsAlive()) {
 		PlayerPrefs::getInstance()->addScore(score);
-		SceneManager::getInstance()->changeScene("Menu");
+		PlayerPrefs::getInstance()->setLastScore(score);
+		SceneManager::getInstance()->changeScene("GameOver");
 	}
 
 	healthText->get_component<Text>()->setText("Health: " + std::to_string(player->getHealth()));
 	scoreText->get_component<Text>()->setText("Score: " + std::to_string(score));
+
+	if (player->getSelectedWeapon() == Magic) {
+		magicImg->get_component<Transform>()->scale = glm::vec3(0.075f, 0.075f, 0.05f);
+		freezeImg->get_component<Transform>()->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+		fireballImg->get_component<Transform>()->scale = glm::vec3(0.0325f, 0.045f, 0.05f);
+	}
+	else if (player->getSelectedWeapon() == Freeze) {
+		magicImg->get_component<Transform>()->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+		freezeImg->get_component<Transform>()->scale = glm::vec3(0.075f, 0.075f, 0.05f);
+		fireballImg->get_component<Transform>()->scale = glm::vec3(0.0325f, 0.045f, 0.05f);
+	}
+	else if (player->getSelectedWeapon() == Fireball) {
+		magicImg->get_component<Transform>()->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+		freezeImg->get_component<Transform>()->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+		fireballImg->get_component<Transform>()->scale = glm::vec3(0.0525f, 0.06f, 0.05f);
+	}
 
 	map->update(dt);
 	rocket->update(dt);
 	healthText->update(dt);
 	scoreText->update(dt);
 	player->update(dt);
+	magicImg->update(dt);
+	freezeImg->update(dt);
+	fireballImg->update(dt);
 
 	SoundManager::get_instance().update();
 	SoundManager::get_instance().update_listener(camera->get_position(), camera->get_forward(), camera->get_up());
@@ -439,16 +572,28 @@ void GameScene::render2d() {
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_CULL_FACE);
 
-	auto* tf = rocket->get_component<Transform>();
-	tf->rotation = glm::quat{ 1,0,0,0 };
+	auto* tr = rocket->get_component<Transform>();
+	tr->rotation = glm::quat{ 1,0,0,0 };
 	rocket->render();
 
-	auto* tf2 = healthText->get_component<Transform>();
+	auto* tm = magicImg->get_component<Transform>();
+	tm->rotation = glm::quat{ 1,0,0,0 };
+	magicImg->render();
+
+	auto* tf = freezeImg->get_component<Transform>();
+	tf->rotation = glm::quat{ 1,0,0,0 };
+	freezeImg->render();
+
+	auto* tf2 = fireballImg->get_component<Transform>();
 	tf2->rotation = glm::quat{ 1,0,0,0 };
+	fireballImg->render();
+
+	auto* tf3 = healthText->get_component<Transform>();
+	tf3->rotation = glm::quat{ 1,0,0,0 };
 	healthText->render();
 
-	auto* tf3 = scoreText->get_component<Transform>();
-	tf3->rotation = glm::quat{ 1,0,0,0 };
+	auto* tf4 = scoreText->get_component<Transform>();
+	tf4->rotation = glm::quat{ 1,0,0,0 };
 	scoreText->render();
 
 	glPopMatrix();
@@ -488,7 +633,7 @@ void GameScene::render3d() {
 	map->render();
 	player->render();
 
-	world->debugDrawWorld();
+	if (world) world->debugDrawWorld();
 
 	glPopMatrix();
 
@@ -535,15 +680,62 @@ void GameScene::cleanup()
 	}
 	projectiles.clear();
 
-	delete debug_drawer;
-	debug_drawer = nullptr;
+	for (auto& spawn : enemySpawns) {
+		delete spawn;
+	}
+	enemySpawns.clear();
+
+	map.reset();
+	rocket.reset();
+	magicImg.reset();
+	freezeImg.reset();
+	fireballImg.reset();
+	healthText.reset();
+	scoreText.reset();
+	player.reset();
+	playerTransform = nullptr;
+	playerRb = nullptr;
+
+	if (world) {
+		delete world;
+		world = nullptr;
+	}
+	if (solver) {
+		delete solver;
+		solver = nullptr;
+	}
+	if (dispatcher) {
+		delete dispatcher;
+		dispatcher = nullptr;
+	}
+	if (collision_configuration) {
+		delete collision_configuration;
+		collision_configuration = nullptr;
+	}
+	if (broadphase) {
+		delete broadphase;
+		broadphase = nullptr;
+	}
+
+	if (debug_drawer) {
+		delete debug_drawer;
+		debug_drawer = nullptr;
+	}
+
+	score = 0;
+	spawnTime = 7.5f;
+	randomNum = 0;
+	
+	initialized = false;
 }
 
 void GameScene::onEnter()
 {
 	GameInstance::getInstance()->setCurrentGameScene(this);
+	srand(time(0));
 }
 
 void GameScene::onExit()
 {
+	cleanup();
 }

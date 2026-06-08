@@ -8,6 +8,7 @@ class PlayerPrefs {
 private:
 	static PlayerPrefs* instance;
 	int highScores[4] = { 0, 0, 0, 0 };
+	int lastScore = 0;
 public:
 	static PlayerPrefs* getInstance() {
 		if (!instance) {
@@ -45,5 +46,13 @@ public:
 			}
 			fclose(file);
 		}
+	}
+
+	void setLastScore(int score) {
+		lastScore = score;
+	}
+
+	int getLastScore() {
+		return lastScore;
 	}
 };

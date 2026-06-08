@@ -3,14 +3,24 @@
 void Player::update(float delta_time)
 {
 	GameObject::update(delta_time);
+
+	if (Input::get_key_down('1')) {
+		setSelectedWeapon(Magic);
+	}
+	if (Input::get_key_down('2')) {
+		setSelectedWeapon(Freeze);
+	}
+	if (Input::get_key_down('3')) {
+		setSelectedWeapon(Fireball);
+	}
 }
 
-ProjectileType Player::getSelectedWeapon()
+ProjectileTypes Player::getSelectedWeapon()
 {
 	return selectedWeapon;
 }
 
-void Player::setSelectedWeapon(ProjectileType weapon)
+void Player::setSelectedWeapon(ProjectileTypes weapon)
 {
 	selectedWeapon = weapon;
 }

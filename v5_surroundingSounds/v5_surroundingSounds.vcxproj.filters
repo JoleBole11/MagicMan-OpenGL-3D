@@ -120,6 +120,21 @@
     <ClCompile Include="MainMenuScene.cpp">
       <Filter>Source Files\SceneManager\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="HeavyEnemy.cpp">
+      <Filter>Source Files\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Source Files\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="FreezeProjectile.cpp">
+      <Filter>Source Files\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="FireballProjectile.cpp">
+      <Filter>Source Files\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="GameOverScene.cpp">
+      <Filter>Source Files\SceneManager\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component.h">
@@ -223,6 +238,21 @@
     </ClInclude>
     <ClInclude Include="PlayerPrefs.h">
       <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="HeavyEnemy.h">
+      <Filter>Header Files\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Header Files\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="FreezeProjectile.h">
+      <Filter>Header Files\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="FireballProjectile.h">
+      <Filter>Header Files\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="GameOverScene.h">
+      <Filter>Header Files\SceneManager\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

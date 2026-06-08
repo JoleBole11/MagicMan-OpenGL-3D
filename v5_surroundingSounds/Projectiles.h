@@ -1,6 +1,6 @@
 #pragma once
 
-enum ProjectileType
+enum ProjectileTypes
 {
 	Magic = 1,
 	Freeze = 2,

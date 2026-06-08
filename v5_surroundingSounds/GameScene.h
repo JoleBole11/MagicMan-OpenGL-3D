@@ -9,11 +9,15 @@
 #include "Utilities.h"
 #include "Camera.h"
 #include "MagicProjectile.h"
+#include "FreezeProjectile.h"
+#include "FireballProjectile.h"
 #include "Player.h"
 #include "BasicEnemy.h"
+#include "HeavyEnemy.h"
 #include "ObjectType.h"
 #include "PhysicsType.h"
 
+#include <ctime>
 #include <iostream>
 #include <glut.h>
 #include <glm.hpp>
@@ -42,6 +46,7 @@ public:
 	float rotation_speed = 3.0f;
 
 	int score = 0;
+	int randomNum = 0;
 
 	glm::vec2 window_size = { 1000, 1000 };
 
@@ -50,20 +55,23 @@ public:
 	std::unique_ptr<Camera> camera;
 
 	std::unique_ptr<Player> player;
-	std::unique_ptr<Transform> playerTransform;
-	std::unique_ptr<RigidBody> playerRb;
+	Transform* playerTransform = nullptr;
+	RigidBody* playerRb = nullptr;
 
 	std::unique_ptr<GameObject> map;
 	std::unique_ptr<GameObject> tree;
 	std::unique_ptr<GameObject> rocket;
+	std::unique_ptr<GameObject> magicImg;
+	std::unique_ptr<GameObject> freezeImg;
+	std::unique_ptr<GameObject> fireballImg;
 	std::unique_ptr<GameObject> healthText;
 	std::unique_ptr<GameObject> scoreText;
 
 	std::vector<std::vector<int>> treeMap;
 	std::vector<GameObject*> trees;
-	std::vector<MagicProjectile*> projectiles;
+	std::vector<Projectile*> projectiles;
 	std::vector<GameObject*> enemySpawns;
-	std::vector<BasicEnemy*> enemies;
+	std::vector<Enemy*> enemies;
 	std::vector<GameObject*> invisibleWalls;
 
 	static std::unique_ptr<Font> shared_font;

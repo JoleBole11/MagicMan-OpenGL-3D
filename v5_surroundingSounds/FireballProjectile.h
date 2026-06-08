@@ -1,14 +1,14 @@
 #pragma once
 #include "Projectile.h"
-class MagicProjectile : public Projectile
+class FireballProjectile : public Projectile
 {
 private:
 	float lifetime = 5.0f;
-	float damage = 50.0f;
+	float damage = 100.0f;
 	bool isAlive = true;
 
 public:
-	MagicProjectile(const std::string& name) : Projectile(name) {}
+	FireballProjectile(const std::string& name) : Projectile(name) {}
 
 	void update(float delta_time);
 	float getDamage() const { return damage; }

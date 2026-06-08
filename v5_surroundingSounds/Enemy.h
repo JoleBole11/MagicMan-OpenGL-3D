@@ -10,6 +10,9 @@ private:
 	bool isAlive;
 	Player* player;
 	float moveSpeed;
+	int pointsWorth;
+	float slowDownTimer;
+	bool isSlowed;
 public:
 	Enemy() : GameObject() {}
 	Enemy(const std::string& name) : GameObject(name) {}
@@ -22,5 +25,7 @@ public:
 	virtual void setIsAlive(bool alive);
 	virtual bool getIsAlive();
 	virtual float getAttackCooldown();
+	virtual void setPlayer(Player* p);
+	virtual void slowDown();
 };
 

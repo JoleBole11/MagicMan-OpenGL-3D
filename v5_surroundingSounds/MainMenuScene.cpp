@@ -80,9 +80,7 @@ void MainMenuScene::update(float deltaTime)
     }
     if (Input::get_key_down('q')) {
         exit(0);
-    }
-
-    
+    } 
 }
 
 void MainMenuScene::update_physics(float deltaTime)
@@ -174,20 +172,15 @@ void MainMenuScene::render3d()
 
 void MainMenuScene::cleanup()
 {
-    delete &gameName;
-    gameName = nullptr;
-    delete &playText;
-    playText = nullptr;
-    delete &quitText;
-    quitText = nullptr;
-    delete &highScoreText;
-	highScoreText = nullptr;
-	delete& highScore1;
-	highScore1 = nullptr;
-	delete& highScore2;
-	highScore2 = nullptr;
-	delete& highScore3;
-	highScore3 = nullptr;
+    gameName.reset();
+    playText.reset();
+    quitText.reset();
+    highScoreText.reset();
+    highScore1.reset();
+    highScore2.reset();
+    highScore3.reset();
+    shared_font.reset();
+    initialized = false;
 }
 
 void MainMenuScene::onEnter()

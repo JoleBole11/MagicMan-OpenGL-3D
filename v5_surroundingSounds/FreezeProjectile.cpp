@@ -1,6 +1,6 @@
-#include "MagicProjectile.h"
+#include "FreezeProjectile.h"
 
-void MagicProjectile::update(float delta_time) {
+void FreezeProjectile::update(float delta_time) {
 	Projectile::update(delta_time);
 	lifetime -= delta_time;
 	if (lifetime <= 0) {

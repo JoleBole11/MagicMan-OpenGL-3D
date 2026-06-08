@@ -7,6 +7,7 @@
 #include <memory>
 #include <iostream>
 #include "MainMenuScene.h"
+#include "GameOverScene.h"
 
 PFNGLACTIVETEXTUREARBPROC Material::glActiveTextureARB = nullptr;
 PFNGLMULTITEXCOORD2FARBPROC Material::glMultiTexCoord2fARB = nullptr;
@@ -75,6 +76,7 @@ int main(int argv, char** argc) {
     sceneManager->addScene("Intro", std::make_unique<IntroScene>());
 	sceneManager->addScene("Menu", std::make_unique<MainMenuScene>());
     sceneManager->addScene("Game", std::make_unique<GameScene>());
+    sceneManager->addScene("GameOver", std::make_unique<GameOverScene>());
     sceneManager->changeScene("Intro");
 
     glutMainLoop();
