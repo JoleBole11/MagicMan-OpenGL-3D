@@ -1,6 +1,5 @@
 #include "Player.h"
 
-
 void Player::update(float delta_time)
 {
 	GameObject::update(delta_time);
@@ -18,11 +17,10 @@ void Player::update(float delta_time)
 
 void Player::handleInput(Camera* camera, btDynamicsWorld* world, std::vector<Projectile*>& projectiles, float delta_time)
 {
-	auto* rbComp = get_component<RigidBody>();
+	auto* rb = get_component<RigidBody>();
 	auto* t = get_component<Transform>();
-	if (!rbComp || !t || !camera) return;
 
-	btRigidBody* body = rbComp->get_body();
+	btRigidBody* body = rb->get_body();
 
 	float v = Input::get_axis("Vertical");
 	float h = Input::get_axis("Horizontal");
