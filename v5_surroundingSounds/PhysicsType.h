@@ -4,5 +4,5 @@
 struct PhysicsType
 {
     ObjectType type;
-    void* object;
+    GameObject* object;
 };
