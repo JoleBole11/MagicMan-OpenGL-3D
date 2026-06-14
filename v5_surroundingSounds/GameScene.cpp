@@ -318,9 +318,9 @@ void GameScene::update_physics(float delta_time) {
 		btCollisionObject* objA = (btCollisionObject*)(manifold->getBody0());
 		btCollisionObject* objB = (btCollisionObject*)(manifold->getBody1());
 
-		auto* dataA = static_cast<PhysicsType*>(objA->getUserPointer());
+		PhysicsType* dataA = static_cast<PhysicsType*>(objA->getUserPointer());
 
-		auto* dataB = static_cast<PhysicsType*>(objB->getUserPointer());
+		PhysicsType* dataB = static_cast<PhysicsType*>(objB->getUserPointer());
 
 		switch (dataA->type)
 		{
