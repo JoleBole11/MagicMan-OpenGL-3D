@@ -598,7 +598,7 @@ void GameScene::render3d() {
 	map->render();
 	player->render();
 
-	if (world) world->debugDrawWorld();
+	//if (world) world->debugDrawWorld();
 
 	glPopMatrix();
 
