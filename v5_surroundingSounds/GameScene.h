@@ -48,9 +48,9 @@ private:
 	glm::vec2 window_size = { 1000, 1000 };
 
 	GLfloat light_pos[4] = { 10.0f, 30.0f, 10.0f, 0.0f };
-	GLfloat diffuse_pos[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
-	GLfloat ambient_pos[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	GLfloat specular_pos[4] = { 0.7f, 0.7f, 0.7f, 1.0f };
+	GLfloat diffuse_pos[4] = { 1.0f,  0.95f, 0.8f,  1.0f };
+	GLfloat ambient_pos[4] = { 0.3f, 0.3f, 0.4f,  1.0f };
+	GLfloat specular_pos[4] = { 0.6f,  0.6f,  0.6f,  1.0f };
 
 
 	bool is_cursor_locked = false;
@@ -58,6 +58,7 @@ private:
 	std::unique_ptr<Camera> camera;
 
 	std::unique_ptr<Player> player;
+	std::unique_ptr<GameObject> playerHands;
 	Transform* playerTransform = nullptr;
 	RigidBody* playerRb = nullptr;
 

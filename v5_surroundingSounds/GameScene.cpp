@@ -19,21 +19,20 @@ void GameScene::initialize() {
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
-	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
-
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_pos);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_pos);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specular_pos);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
 
-	GLfloat light_ambient[] = { 0.5, 0.5, 0.5, 1.0 };
+	GLfloat light_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambient);
-	GLfloat mat_ambient[] = { 0.1,0.1, 0.2, 1.0 };
+
+	GLfloat mat_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat mat_specular[] = { 0.4f, 0.4f, 0.4f, 1.0f };
+	GLfloat mat_shininess[] = { 32.0f };
 	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-	GLfloat mat_specular[] = { 1.0,1.0,1.0, 1.0 };
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	GLfloat low_shininess[] = { 64 };
-	glMaterialfv(GL_FRONT, GL_SHININESS, low_shininess);
+	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
 	glEnable(GL_NORMALIZE);
 	
@@ -61,6 +60,11 @@ void GameScene::initialize() {
 	playerRb->get_body()->setAngularFactor(btVector3(0, 0, 0));
 	playerRb->get_body()->forceActivationState(DISABLE_DEACTIVATION);
 	playerRb->get_body()->setUserPointer(new PhysicsType{ ObjectType::PLAYER, player.get()});
+
+	playerHands = std::make_unique<GameObject>("PlayerHands");
+	playerHands->add_component<MeshRenderer>("models/Player/Hands.obj");
+	playerHands->get_component<Transform>()->position = playerTransform->position + glm::vec3(0, 1.2f, 0);
+	playerHands->get_component<Transform>()->scale = glm::vec3(0.13f, 0.13f, 0.13f);
 
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 	Input::set_cursor_lock(is_cursor_locked = true);
@@ -92,12 +96,22 @@ void GameScene::initialize() {
 	for (int i = 0; i < treeMap.size(); i++) {
 		for (int j = 0; j < treeMap[i].size(); j++) {
 			if (treeMap[i][j] == 1) {
-				auto* tree = new GameObject("Tree");
+				GameObject* tree = new GameObject("Tree");
 				tree->add_component<MeshRenderer>("models/tree/tree.obj");
-				auto* t = tree->get_component<Transform>();
-				t->position = glm::vec3((i+1) * 5 - 40, 0.0f, (j+1) * 5 - 40);
-				t->rotation = glm::angleAxis(glm::radians(-45.0f), glm::vec3(0, 0, 0));
-				auto* shape = new btBoxShape(btVector3(0.5f, 5.0f, 0.5f));
+				Transform* t = tree->get_component<Transform>();
+
+				float randomScale = (rand() % 120 + 90) / 100;
+
+				float posOffsetX = (rand() % 20 + 0) / 10;
+				float posOffsetZ = (rand() % 20 + 0) / 10;
+
+				float randomRotationY = rand() % 360 + 0;
+
+				t->position = glm::vec3((i + 1) * 5 - 40 + posOffsetX, 0.0f, (j + 1) * 5 - 40 + posOffsetZ);
+				t->scale = glm::vec3(randomScale, randomScale, randomScale);
+				t->rotation = glm::angleAxis(glm::radians(randomRotationY), glm::vec3(0, 1, 0));
+
+				btBoxShape* shape = new btBoxShape(btVector3(0.5f, 5.0f, 0.5f));
 				tree->add_component<RigidBody>(0.0f, shape, world);
 				trees.push_back(tree);
 			}
@@ -526,6 +540,12 @@ void GameScene::update(float dt) {
 	magicImg->update(dt);
 	freezeImg->update(dt);
 	fireballImg->update(dt);
+	playerHands->get_component<Transform>()->position = camera->get_position() + camera->get_forward() * 1.0f;
+
+	glm::vec3 cameraRot = camera->get_rotation();
+	glm::quat pitchQuat = glm::angleAxis(glm::radians(cameraRot.x), camera->get_right());
+	glm::quat yawQuat = glm::angleAxis(glm::radians(cameraRot.y), camera->get_up());
+	playerHands->get_component <Transform>()->rotation = -pitchQuat * yawQuat;
 
 	SoundManager::get_instance().update();
 	SoundManager::get_instance().update_listener(camera->get_position(), camera->get_forward(), camera->get_up());
@@ -595,11 +615,6 @@ void GameScene::render3d() {
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_CULL_FACE);
 
-	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_pos);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_pos);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, diffuse_pos);
-
 	for (auto& tree : trees) {
 		tree->render();
 	}
@@ -614,6 +629,7 @@ void GameScene::render3d() {
 	}
 	map->render();
 	player->render();
+	playerHands->render();
 
 	//if (world) world->debugDrawWorld();
 
@@ -629,6 +645,7 @@ void GameScene::render() {
 	glLoadIdentity();
 
 	camera->render();
+	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
 	render3d();
 	render2d();
