@@ -1,4 +1,6 @@
 ﻿#include "GameScene.h"
+#include <random>
+#include <chrono>
 
 std::unique_ptr<Font> GameScene::shared_font = nullptr;
 
@@ -93,6 +95,11 @@ void GameScene::initialize() {
 		{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
 	};
 
+	std::mt19937 mt(time(nullptr));
+	std::uniform_real_distribution<float> scaleDist(0.9f, 1.2f);
+	std::uniform_real_distribution<float> offsetDist(-2.0f, 2.0f);
+	std::uniform_real_distribution<float> rotationDist(0.0f, 360.0f);
+
 	for (int i = 0; i < treeMap.size(); i++) {
 		for (int j = 0; j < treeMap[i].size(); j++) {
 			if (treeMap[i][j] == 1) {
@@ -100,12 +107,10 @@ void GameScene::initialize() {
 				tree->add_component<MeshRenderer>("models/tree/tree.obj");
 				Transform* t = tree->get_component<Transform>();
 
-				float randomScale = (rand() % 120 + 90) / 100;
-
-				float posOffsetX = (rand() % 20 + 0) / 10;
-				float posOffsetZ = (rand() % 20 + 0) / 10;
-
-				float randomRotationY = rand() % 360 + 0;
+				float randomScale = scaleDist(mt);
+				float posOffsetX = offsetDist(mt);
+				float posOffsetZ = offsetDist(mt);
+				float randomRotationY = rotationDist(mt);
 
 				t->position = glm::vec3((i + 1) * 5 - 40 + posOffsetX, 0.0f, (j + 1) * 5 - 40 + posOffsetZ);
 				t->scale = glm::vec3(randomScale, randomScale, randomScale);
@@ -630,9 +635,17 @@ void GameScene::render3d() {
 	}
 	map->render();
 	player->render();
+
+	if (player->getSelectedWeapon() == Magic)
+		glColor4f(0.65f, 1.0f, 0.65f, 1.0f);
+	else if (player->getSelectedWeapon() == Freeze)
+		glColor4f(0.65f, 0.65f, 1.0f, 1.0f);
+	else
+		glColor4f(1.0f, 0.65f, 0.65f, 1.0f);
+	
 	playerHands->render();
 
-	//if (world) world->debugDrawWorld();
+	//world->debugDrawWorld();
 
 	glPopMatrix();
 
