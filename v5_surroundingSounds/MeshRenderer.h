@@ -17,8 +17,9 @@ public:
             mesh.material.apply();
             mesh.material.handle_transparency();
 
+            glEnable(GL_LIGHTING);
+
             if (!mesh.material.diffuse_map) {
-                glDisable(GL_LIGHTING);
                 glColor4fv(mesh.material.diffuse);
             }
 

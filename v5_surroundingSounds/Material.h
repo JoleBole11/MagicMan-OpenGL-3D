@@ -32,6 +32,14 @@ public:
 		ambient[0] = ambient[1] = ambient[2] = 1.0f; ambient[3] = 1.0f;
 		diffuse[0] = diffuse[1] = diffuse[2] = 1.0f; diffuse[3] = 1.0f;
 	}
+	
+	void setAmbient(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
+		ambient[0] = r; ambient[1] = g; ambient[2] = b; ambient[3] = a;
+	}
+
+	void setDiffuse(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
+		diffuse[0] = r; diffuse[1] = g; diffuse[2] = b; diffuse[3] = a;
+	}
 
 	void handle_transparency() const {
 		glEnable(GL_BLEND);
@@ -43,6 +51,8 @@ public:
 	void apply() const {
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, diffuse);
+
 
 		glActiveTextureARB(GL_TEXTURE0);
 		if (normal_map) {

@@ -37,7 +37,7 @@
 
 class GameScene : public Scene
 {
-public:
+private:
 	float delta_time = 0;
 	float previous_time = 0;
 	float spawnTime = 7.5f;
@@ -46,6 +46,12 @@ public:
 	int randomNum = 0;
 
 	glm::vec2 window_size = { 1000, 1000 };
+
+	GLfloat light_pos[4] = { 10.0f, 30.0f, 10.0f, 0.0f };
+	GLfloat diffuse_pos[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	GLfloat ambient_pos[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	GLfloat specular_pos[4] = { 0.7f, 0.7f, 0.7f, 1.0f };
+
 
 	bool is_cursor_locked = false;
 
@@ -57,7 +63,6 @@ public:
 
 	std::unique_ptr<GameObject> map;
 	std::unique_ptr<GameObject> tree;
-	std::unique_ptr<GameObject> rocket;
 	std::unique_ptr<GameObject> magicImg;
 	std::unique_ptr<GameObject> freezeImg;
 	std::unique_ptr<GameObject> fireballImg;

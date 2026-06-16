@@ -14,6 +14,28 @@ GameScene::~GameScene() {
 void GameScene::initialize() {
 	cleanup();
 
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
+
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_pos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_pos);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular_pos);
+
+	GLfloat light_ambient[] = { 0.5, 0.5, 0.5, 1.0 };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambient);
+	GLfloat mat_ambient[] = { 0.1,0.1, 0.2, 1.0 };
+	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+	GLfloat mat_specular[] = { 1.0,1.0,1.0, 1.0 };
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	GLfloat low_shininess[] = { 10 };
+	glMaterialfv(GL_FRONT, GL_SHININESS, low_shininess);
+	
+
 	SoundManager::get_instance().playSong(SoundManager::get_instance().gameplaySong);
 
 	broadphase = new btDbvtBroadphase();
@@ -119,13 +141,6 @@ void GameScene::initialize() {
 	EnemySpawner(glm::vec3(20, 0.5f, -20));
 	EnemySpawner(glm::vec3(-20, 0.5f, 20));
 	EnemySpawner(glm::vec3(-20, 0.5f, -20));
-
-	rocket = std::make_unique<GameObject>("Sprite");
-	rocket->add_component<Sprite>("sprites/rocket.png");
-	auto* tr = rocket->get_component<Transform>();
-	if (tr) {
-		tr->scale = glm::vec3(0.3f, 0.3f, 0.3f);
-	}
 
 	magicImg = std::make_unique<GameObject>("Sprite");
 	magicImg->add_component<Sprite>("sprites/magic.png");
@@ -503,7 +518,6 @@ void GameScene::update(float dt) {
 	}
 
 	map->update(dt);
-	rocket->update(dt);
 	healthText->update(dt);
 	scoreText->update(dt);
 	player->update(dt);
@@ -536,10 +550,6 @@ void GameScene::render2d() {
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_CULL_FACE);
-
-	auto* tr = rocket->get_component<Transform>();
-	tr->rotation = glm::quat{ 1,0,0,0 };
-	rocket->render();
 
 	auto* tm = magicImg->get_component<Transform>();
 	tm->rotation = glm::quat{ 1,0,0,0 };
@@ -651,7 +661,6 @@ void GameScene::cleanup()
 	enemySpawns.clear();
 
 	map.reset();
-	rocket.reset();
 	magicImg.reset();
 	freezeImg.reset();
 	fireballImg.reset();
