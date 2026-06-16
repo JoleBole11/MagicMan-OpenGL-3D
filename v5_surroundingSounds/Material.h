@@ -51,7 +51,6 @@ public:
 	void apply() const {
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, diffuse);
 
 
 		glActiveTextureARB(GL_TEXTURE0);

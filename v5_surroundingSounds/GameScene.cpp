@@ -32,8 +32,10 @@ void GameScene::initialize() {
 	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
 	GLfloat mat_specular[] = { 1.0,1.0,1.0, 1.0 };
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	GLfloat low_shininess[] = { 10 };
+	GLfloat low_shininess[] = { 64 };
 	glMaterialfv(GL_FRONT, GL_SHININESS, low_shininess);
+
+	glEnable(GL_NORMALIZE);
 	
 
 	SoundManager::get_instance().playSong(SoundManager::get_instance().gameplaySong);
@@ -592,6 +594,11 @@ void GameScene::render3d() {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_CULL_FACE);
+
+	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_pos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_pos);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, diffuse_pos);
 
 	for (auto& tree : trees) {
 		tree->render();
