@@ -64,7 +64,7 @@ void GameScene::initialize() {
 	playerHands = std::make_unique<GameObject>("PlayerHands");
 	playerHands->add_component<MeshRenderer>("models/Player/Hands.obj");
 	playerHands->get_component<Transform>()->position = playerTransform->position + glm::vec3(0, 1.2f, 0);
-	playerHands->get_component<Transform>()->scale = glm::vec3(0.13f, 0.13f, 0.13f);
+	playerHands->get_component<Transform>()->scale = glm::vec3(0.1f, 0.1f, 0.1f);
 
 	camera = std::make_unique<Camera>(60.0f, float(window_size[0]) / float(window_size[1]), 0.1f, 300.0f);
 	Input::set_cursor_lock(is_cursor_locked = true);
@@ -540,12 +540,13 @@ void GameScene::update(float dt) {
 	magicImg->update(dt);
 	freezeImg->update(dt);
 	fireballImg->update(dt);
-	playerHands->get_component<Transform>()->position = camera->get_position() + camera->get_forward() * 1.0f;
+	playerHands->get_component<Transform>()->position = camera->get_position() + camera->get_forward() * 1.0f - camera->get_up() * 0.2f;
 
 	glm::vec3 cameraRot = camera->get_rotation();
-	glm::quat pitchQuat = glm::angleAxis(glm::radians(cameraRot.x), camera->get_right());
-	glm::quat yawQuat = glm::angleAxis(glm::radians(cameraRot.y), camera->get_up());
-	playerHands->get_component <Transform>()->rotation = -pitchQuat * yawQuat;
+	glm::quat yaw = glm::angleAxis(glm::radians(-cameraRot.y), glm::vec3(0, 1, 0));
+	glm::quat pitch = glm::angleAxis(glm::radians(-cameraRot.x), glm::vec3(1, 0, 0));
+	glm::quat flip = glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 1, 0));
+	playerHands->get_component<Transform>()->rotation = yaw * pitch * flip;
 
 	SoundManager::get_instance().update();
 	SoundManager::get_instance().update_listener(camera->get_position(), camera->get_forward(), camera->get_up());
