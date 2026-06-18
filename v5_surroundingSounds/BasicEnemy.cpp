@@ -86,3 +86,8 @@ void BasicEnemy::slowDown()
 	slowDownTimer = 3.0f;
 	moveSpeed = 2.0f;
 }
+
+int BasicEnemy::getPointsWorth()
+{
+	return pointsWorth;
+}

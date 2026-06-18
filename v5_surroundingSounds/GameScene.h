@@ -18,6 +18,8 @@
 #include "PhysicsType.h"
 #include "CooldownPickup.h"
 #include "HealPickup.h"
+#include "SpeedPickup.h"
+#include "NukePickup.h"
 
 #include <random>
 #include <chrono>

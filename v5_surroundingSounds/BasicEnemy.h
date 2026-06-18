@@ -26,4 +26,5 @@ public:
 	float getAttackCooldown() override { return attackCooldown; }
 	void setPlayer(Player* p) override;
 	void slowDown() override;
+	int getPointsWorth() override;
 };

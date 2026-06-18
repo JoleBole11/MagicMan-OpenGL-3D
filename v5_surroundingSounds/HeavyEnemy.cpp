@@ -82,3 +82,8 @@ void HeavyEnemy::slowDown()
 	slowDownTimer = 3.0f;
 	moveSpeed = 1.25f;
 }
+
+int HeavyEnemy::getPointsWorth()
+{
+	return pointsWorth;
+}

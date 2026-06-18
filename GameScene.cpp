@@ -1,4 +1,4 @@
-﻿#include "GameScene.h"
+#include "GameScene.h"
 
 std::unique_ptr<Font> GameScene::shared_font = nullptr;
 std::mt19937 mt(time(nullptr));
@@ -10,7 +10,7 @@ std::uniform_int_distribution<int> pickupTypeDist(1, 9);
 
 GameScene::GameScene() : Scene("Game")
 {
-	
+
 }
 
 GameScene::~GameScene() {
@@ -42,8 +42,8 @@ void GameScene::initialize() {
 
 	glEnable(GL_NORMALIZE);
 
-	
-	
+
+
 
 	int randomDrop = 1;
 
@@ -69,7 +69,7 @@ void GameScene::initialize() {
 	playerRb = player->get_component<RigidBody>();
 	playerRb->get_body()->setAngularFactor(btVector3(0, 0, 0));
 	playerRb->get_body()->forceActivationState(DISABLE_DEACTIVATION);
-	playerRb->get_body()->setUserPointer(new PhysicsType{ ObjectType::PLAYER, player.get()});
+	playerRb->get_body()->setUserPointer(new PhysicsType{ ObjectType::PLAYER, player.get() });
 
 	playerHands = std::make_unique<GameObject>("PlayerHands");
 	playerHands->add_component<MeshRenderer>("models/Player/Hands.obj");
@@ -274,8 +274,8 @@ void GameScene::dropPickup(const glm::vec3& pos)
 		pickup->add_component<MeshRenderer>("models/Pickups/nuke.obj");
 		btBoxShape* pickupBox = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
 		Transform* pickupT = pickup->get_component<Transform>();
-		pickupT->position = glm::vec3(pos.x, 1.5f, pos.z);
-		pickupT->scale = glm::vec3(0.7f, 0.7f, 0.7f);
+		pickupT->position = glm::vec3(pos.x, 1.0f, pos.z);
+		pickupT->scale = glm::vec3(0.5f, 0.5f, 0.5f);
 		pickupT->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 0, 0));
 
 		pickup->add_component<RigidBody>(0.0f, pickupBox, world);
@@ -326,19 +326,7 @@ void GameScene::dropPickup(const glm::vec3& pos)
 			pickups.push_back(pickup);
 		}
 		else {
-			dropType = pickupTypeDist(mt);
-			NukePickup* pickup = new NukePickup("cooldownPickup");
-			pickup->add_component<MeshRenderer>("models/Pickups/nuke.obj");
-			btBoxShape* pickupBox = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
-			Transform* pickupT = pickup->get_component<Transform>();
-			pickupT->position = glm::vec3(pos.x, 1.5f, pos.z);
-			pickupT->scale = glm::vec3(0.7f, 0.7f, 0.7f);
-			pickupT->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 0, 0));
 
-			pickup->add_component<RigidBody>(0.0f, pickupBox, world);
-			btRigidBody* pickupBody = pickup->get_component<RigidBody>()->get_body();
-			pickup->get_component<RigidBody>()->get_body()->setUserPointer(new PhysicsType{ ObjectType::PICKUP, pickup });
-			pickups.push_back(pickup);
 		}*/
 	}
 }
@@ -448,103 +436,103 @@ void GameScene::update_physics(float delta_time) {
 
 		switch (dataA->type)
 		{
-			case ObjectType::PLAYER:
-				if (dataB->type == ObjectType::PROJECTILE) {
-					continue;
+		case ObjectType::PLAYER:
+			if (dataB->type == ObjectType::PROJECTILE) {
+				continue;
+			}
+
+			if (dataB->type == ObjectType::ENEMY) {
+
+				Enemy* enemy = static_cast<Enemy*>(dataB->object);
+
+				if (enemy->getAttackCooldown() <= 0) {
+					enemy->attack();
+					player->takeDamage(enemy->getDamage());
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().enemyAttackSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().playerHitSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
 				}
+			}
 
-				if (dataB->type == ObjectType::ENEMY) {
-					
-					Enemy* enemy = static_cast<Enemy*>(dataB->object);
+			if (dataB->type == ObjectType::PICKUP) {
+				Pickup* pickup1 = static_cast<Pickup*>(dataB->object);
 
-					if (enemy->getAttackCooldown() <= 0) {
-						enemy->attack();
-						player->takeDamage(enemy->getDamage());
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().enemyAttackSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().playerHitSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
-					}
+				pickup1->onPickup(player.get());
+				pickup1->setIsAlive(false);
+			}
+
+			break;
+		case ObjectType::ENEMY:
+			if (dataB->type == ObjectType::PROJECTILE) {
+				Enemy* enemy = static_cast<Enemy*>(dataA->object);
+				Projectile* projectile = static_cast<Projectile*>(dataB->object);
+
+				if (auto* projectileObj = dynamic_cast<MagicProjectile*>(projectile)) {
+					enemy->takeDamage(projectileObj->getDamage());
+					projectileObj->setIsAlive(false);
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().magicHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 				}
-
-				if (dataB->type == ObjectType::PICKUP) {
-					Pickup* pickup1 = static_cast<Pickup*>(dataB->object);
-
-					pickup1->onPickup(player.get());
-					pickup1->setIsAlive(false);
+				else if (auto* projectileObj = dynamic_cast<FreezeProjectile*>(projectile)) {
+					enemy->takeDamage(projectileObj->getDamage());
+					enemy->slowDown();
+					projectileObj->setIsAlive(false);
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().freezeHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 				}
-				
-				break;
-			case ObjectType::ENEMY:
-				if (dataB->type == ObjectType::PROJECTILE) {
-					Enemy* enemy = static_cast<Enemy*>(dataA->object);
-					Projectile* projectile = static_cast<Projectile*>(dataB->object);
-
-					if (auto* projectileObj = dynamic_cast<MagicProjectile*>(projectile)) {
-						enemy->takeDamage(projectileObj->getDamage());
-						projectileObj->setIsAlive(false);
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().magicHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
-					}
-					else if (auto* projectileObj = dynamic_cast<FreezeProjectile*>(projectile)) {
-						enemy->takeDamage(projectileObj->getDamage());
-						enemy->slowDown();
-						projectileObj->setIsAlive(false);
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().freezeHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
-					}
-					else if (auto* projectileObj = dynamic_cast<FireballProjectile*>(projectile)) {
-						enemy->takeDamage(projectileObj->getDamage());
-						projectileObj->setIsAlive(false);
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().fireballHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
-					}
+				else if (auto* projectileObj = dynamic_cast<FireballProjectile*>(projectile)) {
+					enemy->takeDamage(projectileObj->getDamage());
+					projectileObj->setIsAlive(false);
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().fireballHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 				}
+			}
 
-				if (dataB->type == ObjectType::PLAYER) {
-					Enemy* enemy = static_cast<Enemy*>(dataA->object);
+			if (dataB->type == ObjectType::PLAYER) {
+				Enemy* enemy = static_cast<Enemy*>(dataA->object);
 
-					if (enemy->getAttackCooldown() <= 0) {
-						enemy->attack();
-						player->takeDamage(enemy->getDamage());
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().enemyAttackSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().playerHitSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
-					}
+				if (enemy->getAttackCooldown() <= 0) {
+					enemy->attack();
+					player->takeDamage(enemy->getDamage());
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().enemyAttackSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().playerHitSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
 				}
+			}
 
-				break;
-			case ObjectType::PROJECTILE:
-				if (dataB->type == ObjectType::PLAYER) {
-					continue;
+			break;
+		case ObjectType::PROJECTILE:
+			if (dataB->type == ObjectType::PLAYER) {
+				continue;
+			}
+
+			if (dataB->type == ObjectType::ENEMY) {
+				Enemy* enemy = static_cast<Enemy*>(dataB->object);
+				MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
+
+				if (auto* projectileObj = dynamic_cast<MagicProjectile*>(projectile)) {
+					enemy->takeDamage(projectileObj->getDamage());
+					projectileObj->setIsAlive(false);
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().magicHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 				}
-
-				if (dataB->type == ObjectType::ENEMY) {
-					Enemy* enemy = static_cast<Enemy*>(dataB->object);
-					MagicProjectile* projectile = static_cast<MagicProjectile*>(dataA->object);
-
-					if (auto* projectileObj = dynamic_cast<MagicProjectile*>(projectile)) {
-						enemy->takeDamage(projectileObj->getDamage());
-						projectileObj->setIsAlive(false);
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().magicHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
-					}
-					else if (auto* projectileObj = dynamic_cast<FreezeProjectile*>(projectile)) {
-						enemy->takeDamage(projectileObj->getDamage());
-						enemy->slowDown();
-						projectileObj->setIsAlive(false);
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().freezeHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
-					}
-					else if (auto* projectileObj = dynamic_cast<FireballProjectile*>(projectile)) {
-						enemy->takeDamage(projectileObj->getDamage());
-						projectileObj->setIsAlive(false);
-						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().fireballHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
-					}
+				else if (auto* projectileObj = dynamic_cast<FreezeProjectile*>(projectile)) {
+					enemy->takeDamage(projectileObj->getDamage());
+					enemy->slowDown();
+					projectileObj->setIsAlive(false);
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().freezeHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 				}
-				break;
-			case ObjectType::PICKUP:
-				if (dataB->type == ObjectType::PLAYER) {
-					Pickup* pickup1 = static_cast<Pickup*>(dataA->object);
-
-					pickup1->onPickup(player.get());
-					pickup1->setIsAlive(false);
+				else if (auto* projectileObj = dynamic_cast<FireballProjectile*>(projectile)) {
+					enemy->takeDamage(projectileObj->getDamage());
+					projectileObj->setIsAlive(false);
+					SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().fireballHitSound, SoundManager::get_instance().surrounding_sounds, enemy->get_component<Transform>()->position);
 				}
-				break;
-			default:
-				break;
+			}
+			break;
+		case ObjectType::PICKUP:
+			if (dataB->type == ObjectType::PLAYER) {
+				Pickup* pickup1 = static_cast<Pickup*>(dataA->object);
+
+				pickup1->onPickup(player.get());
+				pickup1->setIsAlive(false);
+			}
+			break;
+		default:
+			break;
 		}
 		if (manifold->getNumContacts() > 0) {
 			if (dataA->type == ObjectType::PROJECTILE) {
@@ -569,7 +557,7 @@ void GameScene::update(float dt) {
 	if (Input::get_key_down('E'))
 		Input::set_cursor_lock(is_cursor_locked = !is_cursor_locked);
 
-	if(spawnTime > 0)
+	if (spawnTime > 0)
 		spawnTime -= dt;
 	else {
 		spawnTime = 7.5f;
@@ -588,7 +576,7 @@ void GameScene::update(float dt) {
 	auto it = projectiles.begin();
 	while (it != projectiles.end()) {
 		if (!(*it)->getIsAlive()) {
-			delete *it;
+			delete* it;
 			it = projectiles.erase(it);
 		}
 		else {
@@ -605,7 +593,7 @@ void GameScene::update(float dt) {
 		if (!(*enemyIt)->getIsAlive()) {
 			score += (*enemyIt)->getPointsWorth();
 			dropPickup((*enemyIt)->get_component<Transform>()->position);
-			delete *enemyIt;
+			delete* enemyIt;
 			enemyIt = enemies.erase(enemyIt);
 		}
 		else {
@@ -774,7 +762,7 @@ void GameScene::render3d() {
 		glColor4f(0.65f, 0.65f, 1.0f, 1.0f);
 	else
 		glColor4f(1.0f, 0.65f, 0.65f, 1.0f);
-	
+
 	playerHands->render();
 
 	world->debugDrawWorld();
@@ -876,7 +864,7 @@ void GameScene::cleanup()
 	score = 0;
 	spawnTime = 7.5f;
 	randomNum = 0;
-	
+
 	initialized = false;
 }
 

@@ -27,6 +27,6 @@ public:
 	virtual float getAttackCooldown();
 	virtual void setPlayer(Player* p);
 	virtual void slowDown();
-	int getPointsWorth();
+	virtual int getPointsWorth();
 };
 
