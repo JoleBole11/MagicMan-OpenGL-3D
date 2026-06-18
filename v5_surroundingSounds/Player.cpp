@@ -54,6 +54,14 @@ void Player::handleInput(Camera* camera, btDynamicsWorld* world, std::vector<Pro
 		fireCooldown -= delta_time;
 	}
 
+	if (cooldownPowerDuration <= 0.0f) {
+		cooldownPowered = false;
+	}
+	else {
+		cooldownPowered = true;
+		cooldownPowerDuration -= delta_time;
+	}
+
 	if (Input::get_mouse_button_down(0) && fireCooldown <= 0.0f) {
 		Projectile* projectile = nullptr;
 		Transform* tp = nullptr;
@@ -84,7 +92,13 @@ void Player::handleInput(Camera* camera, btDynamicsWorld* world, std::vector<Pro
 			projectile->get_component<RigidBody>()->get_body()->setUserPointer(physicsType);
 
 			projectiles.push_back(projectile);
-			fireCooldown = magicCooldown;
+			if (!cooldownPowered) {
+				fireCooldown = magicCooldown;
+			}
+			else {
+				fireCooldown = poweredUpCooldown;
+			}
+			
 			break;
 		case Freeze:
 			projectile = new FreezeProjectile("Projectile");
@@ -105,7 +119,12 @@ void Player::handleInput(Camera* camera, btDynamicsWorld* world, std::vector<Pro
 			projectile->get_component<RigidBody>()->get_body()->setUserPointer(physicsType);
 
 			projectiles.push_back(projectile);
-			fireCooldown = freezeCooldown;
+			if (!cooldownPowered) {
+				fireCooldown = freezeCooldown;
+			}
+			else {
+				fireCooldown = poweredUpCooldown;
+			}
 			break;
 		case Fireball:
 			projectile = new FireballProjectile("Projectile");
@@ -126,7 +145,12 @@ void Player::handleInput(Camera* camera, btDynamicsWorld* world, std::vector<Pro
 			projectile->get_component<RigidBody>()->get_body()->setUserPointer(physicsType);
 
 			projectiles.push_back(projectile);
-			fireCooldown = fireballCooldown;
+			if (!cooldownPowered) {
+				fireCooldown = fireballCooldown;
+			}
+			else {
+				fireCooldown = poweredUpFireballCooldown;
+			}
 			break;
 		default:
 			break;
@@ -156,6 +180,11 @@ void Player::setFireCooldown(float cooldown)
 	fireCooldown = cooldown;
 }
 
+void Player::activateCooldownPower()
+{
+	cooldownPowerDuration = 6.0f;
+}
+
 bool Player::getIsAlive()
 {
 	return isAlive;
@@ -164,6 +193,11 @@ bool Player::getIsAlive()
 int Player::getHealth()
 {
 	return health;
+}
+
+void Player::addHealth(int hp)
+{
+	health += hp;
 }
 
 void Player::takeDamage(float damage)

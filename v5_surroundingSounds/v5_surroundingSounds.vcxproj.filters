@@ -73,6 +73,12 @@
     <Filter Include="Source Files\SceneManager\Scenes">
       <UniqueIdentifier>{d30a9373-5a6e-4755-902b-d2ca7f5e6ac5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Pickup">
+      <UniqueIdentifier>{039628cd-b667-4e9d-8141-00347565ea25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Pickup">
+      <UniqueIdentifier>{8a4ec258-b2b7-4ce4-a90b-12c6a8e1cc5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -134,6 +140,12 @@
     </ClCompile>
     <ClCompile Include="GameOverScene.cpp">
       <Filter>Source Files\SceneManager\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Pickup.cpp">
+      <Filter>Source Files\Pickup</Filter>
+    </ClCompile>
+    <ClCompile Include="CooldownPickup.cpp">
+      <Filter>Source Files\Pickup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -253,6 +265,12 @@
     </ClInclude>
     <ClInclude Include="GameOverScene.h">
       <Filter>Header Files\SceneManager\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Pickup.h">
+      <Filter>Header Files\Pickup</Filter>
+    </ClInclude>
+    <ClInclude Include="CooldownPickup.h">
+      <Filter>Header Files\Pickup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

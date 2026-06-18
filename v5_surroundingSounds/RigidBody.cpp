@@ -55,3 +55,4 @@ void RigidBody::init() {
 
     bt_world->addRigidBody(rigid_body);
 }
+

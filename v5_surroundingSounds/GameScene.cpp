@@ -1,8 +1,12 @@
 ﻿#include "GameScene.h"
-#include <random>
-#include <chrono>
 
 std::unique_ptr<Font> GameScene::shared_font = nullptr;
+std::mt19937 mt(time(nullptr));
+std::uniform_real_distribution<float> scaleDist(0.9f, 1.2f);
+std::uniform_real_distribution<float> offsetDist(-2.0f, 2.0f);
+std::uniform_real_distribution<float> rotationDist(0.0f, 360.0f);
+std::uniform_int_distribution<int> pickupChanceDist(1, 6);
+std::uniform_int_distribution<int> pickupTypeDist(1, 6);
 
 GameScene::GameScene() : Scene("Game")
 {
@@ -37,7 +41,11 @@ void GameScene::initialize() {
 	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
 	glEnable(GL_NORMALIZE);
+
 	
+	
+
+	int randomDrop = 1;
 
 	SoundManager::get_instance().playSong(SoundManager::get_instance().gameplaySong);
 
@@ -94,11 +102,6 @@ void GameScene::initialize() {
 		{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
 		{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
 	};
-
-	std::mt19937 mt(time(nullptr));
-	std::uniform_real_distribution<float> scaleDist(0.9f, 1.2f);
-	std::uniform_real_distribution<float> offsetDist(-2.0f, 2.0f);
-	std::uniform_real_distribution<float> rotationDist(0.0f, 360.0f);
 
 	for (int i = 0; i < treeMap.size(); i++) {
 		for (int j = 0; j < treeMap[i].size(); j++) {
@@ -248,7 +251,7 @@ void GameScene::SpawnEnemy(const glm::vec3& pos)
 		enemy->get_component<Transform>()->position = pos;
 		enemy->add_component<RigidBody>(10.0f, enemyShape, world);
 		enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
-		enemy->get_component<Transform>()->scale = glm::vec3(0.5f, 0.5f, 0.5f);
+		enemy->get_component<Transform>()->scale = glm::vec3(0.7f, 0.5f, 0.7f);
 
 		PhysicsType* type = new PhysicsType{
 		ObjectType::ENEMY,
@@ -259,6 +262,31 @@ void GameScene::SpawnEnemy(const glm::vec3& pos)
 
 		enemy->setPlayer(player.get());
 		enemies.push_back(enemy);
+	}
+}
+
+void GameScene::DropPickup(const glm::vec3& pos)
+{
+	dropChance = pickupChanceDist(mt);
+	if (dropChance) {
+		dropType = pickupTypeDist(mt);
+		if (dropType) {
+			CooldownPickup* pickup = new CooldownPickup("cooldownPickup");
+			pickup->add_component<MeshRenderer>("models/Pickups/clock.obj");
+			auto* pickupBox = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
+			Transform* pickupT = pickup->get_component<Transform>();
+			pickupT->position = glm::vec3(pos.x, 2, pos.z);
+			pickupT->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+
+			btTransform pickupTransform;
+			pickupTransform.setIdentity();
+			pickupTransform.setOrigin(btVector3(pos.x, 2, pos.z));
+			btRigidBody* pickupBody = new btRigidBody(0.0f, nullptr, pickupBox, btVector3(0, 0, 0));
+			pickupBody->setWorldTransform(pickupTransform);
+			world->addRigidBody(pickupBody);
+			pickupBody->setUserPointer(new PhysicsType{ ObjectType::PICKUP, pickup });
+			pickups.push_back(pickup);
+		}
 	}
 }
 
@@ -376,6 +404,13 @@ void GameScene::update_physics(float delta_time) {
 						SoundManager::get_instance().play_sound_on_position(SoundManager::get_instance().playerHitSound, SoundManager::get_instance().surrounding_sounds, playerTransform->position);
 					}
 				}
+
+				if (dataB->type == ObjectType::PICKUP) {
+					Pickup* pickup1 = static_cast<Pickup*>(dataB->object);
+
+					pickup1->onPickup(player.get());
+					pickup1->setIsAlive(false);
+				}
 				
 				break;
 			case ObjectType::ENEMY:
@@ -440,6 +475,14 @@ void GameScene::update_physics(float delta_time) {
 					}
 				}
 				break;
+			case ObjectType::PICKUP:
+				if (dataB->type == ObjectType::PLAYER) {
+					Pickup* pickup1 = static_cast<Pickup*>(dataA->object);
+
+					pickup1->onPickup(player.get());
+					pickup1->setIsAlive(false);
+				}
+				break;
 			default:
 				break;
 		}
@@ -500,9 +543,10 @@ void GameScene::update(float dt) {
 	auto enemyIt = enemies.begin();
 	while (enemyIt != enemies.end()) {
 		if (!(*enemyIt)->getIsAlive()) {
+			score += (*enemyIt)->getPointsWorth();
+			DropPickup((*enemyIt)->get_component<Transform>()->position);
 			delete *enemyIt;
 			enemyIt = enemies.erase(enemyIt);
-			score++;
 		}
 		else {
 			++enemyIt;
@@ -511,6 +555,23 @@ void GameScene::update(float dt) {
 
 	for (auto& enemy : enemies) {
 		enemy->update(dt);
+	}
+
+	auto pickupIt = pickups.begin();
+	while (pickupIt != pickups.end()) {
+		if (!(*pickupIt)->getIsAlive()) {
+			delete* pickupIt;
+			pickupIt = pickups.erase(pickupIt);
+		}
+		else {
+			++pickupIt;
+		}
+	}
+
+	for (auto& pickup : pickups) {
+		pickup->update(dt);
+		glm::quat yaws = glm::angleAxis(glm::radians(1.0f), glm::vec3(0, 1, 0));
+		pickup->get_component<Transform>()->rotation = yaws * pickup->get_component<Transform>()->rotation;
 	}
 
 	if (!player->getIsAlive()) {
@@ -636,6 +697,11 @@ void GameScene::render3d() {
 	map->render();
 	player->render();
 
+	glColor4f(1, 1, 1, 1);
+	for (auto* pickup : pickups) {
+		pickup->render();
+	}
+
 	if (player->getSelectedWeapon() == Magic)
 		glColor4f(0.65f, 1.0f, 0.65f, 1.0f);
 	else if (player->getSelectedWeapon() == Freeze)
@@ -645,7 +711,7 @@ void GameScene::render3d() {
 	
 	playerHands->render();
 
-	//world->debugDrawWorld();
+	world->debugDrawWorld();
 
 	glPopMatrix();
 
@@ -697,6 +763,11 @@ void GameScene::cleanup()
 		delete spawn;
 	}
 	enemySpawns.clear();
+
+	for (auto& pickup : pickups) {
+		delete pickup;
+	}
+	pickups.clear();
 
 	map.reset();
 	magicImg.reset();

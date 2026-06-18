@@ -16,7 +16,10 @@
 #include "HeavyEnemy.h"
 #include "ObjectType.h"
 #include "PhysicsType.h"
+#include "CooldownPickup.h"
 
+#include <random>
+#include <chrono>
 #include <ctime>
 #include <iostream>
 #include <glut.h>
@@ -32,6 +35,7 @@
 
 #include "GameInstance.h"
 #include "SceneManager.h"
+#include "Pickup.h"
 
 
 
@@ -44,6 +48,8 @@ private:
 
 	int score = 0;
 	int randomNum = 0;
+	int dropChance = 0;
+	int dropType = 0;
 
 	glm::vec2 window_size = { 1000, 1000 };
 
@@ -76,6 +82,7 @@ private:
 	std::vector<GameObject*> enemySpawns;
 	std::vector<Enemy*> enemies;
 	std::vector<GameObject*> invisibleWalls;
+	std::vector<Pickup*> pickups;
 
 	static std::unique_ptr<Font> shared_font;
 
@@ -94,6 +101,7 @@ public:
 	void SpawnProjectile();
 	void EnemySpawner(const glm::vec3& pos);
 	void SpawnEnemy(const glm::vec3& pos);
+	void DropPickup(const glm::vec3& pos);
 
 	void initialize() override;
 	void update(float dt) override;

@@ -46,3 +46,8 @@ void Enemy::slowDown()
 	moveSpeed = 1.0f;
 	slowDownTimer = 2.5f;
 }
+
+int Enemy::getPointsWorth()
+{
+    return pointsWorth;
+}
