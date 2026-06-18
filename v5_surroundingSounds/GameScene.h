@@ -17,6 +17,7 @@
 #include "ObjectType.h"
 #include "PhysicsType.h"
 #include "CooldownPickup.h"
+#include "HealPickup.h"
 
 #include <random>
 #include <chrono>
@@ -98,10 +99,11 @@ public:
 	GameScene();
 	~GameScene() override;
 
-	void SpawnProjectile();
-	void EnemySpawner(const glm::vec3& pos);
-	void SpawnEnemy(const glm::vec3& pos);
-	void DropPickup(const glm::vec3& pos);
+	void spawnProjectile();
+	void enemySpawner(const glm::vec3& pos);
+	void spawnEnemy(const glm::vec3& pos);
+	void dropPickup(const glm::vec3& pos);
+	void nukeEnemies();
 
 	void initialize() override;
 	void update(float dt) override;

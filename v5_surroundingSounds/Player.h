@@ -32,6 +32,7 @@ protected:
 	float poweredUpFireballCooldown = 0.8f;
 
 	float cooldownPowerDuration = 0.0f;
+	float speedPowerDuration = 0.0f;
 
 	bool isAlive = true;
 	bool cooldownPowered = false;
@@ -51,6 +52,7 @@ public:
 	void setFireCooldown(float cooldown);
 
 	void activateCooldownPower();
+	void activateSpeedPower();
 
 	bool getIsAlive();
 

@@ -147,6 +147,15 @@
     <ClCompile Include="CooldownPickup.cpp">
       <Filter>Source Files\Pickup</Filter>
     </ClCompile>
+    <ClCompile Include="HealPickup.cpp">
+      <Filter>Source Files\Pickup</Filter>
+    </ClCompile>
+    <ClCompile Include="SpeedPickup.cpp">
+      <Filter>Source Files\Pickup</Filter>
+    </ClCompile>
+    <ClCompile Include="NukePickup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component.h">
@@ -271,6 +280,15 @@
     </ClInclude>
     <ClInclude Include="CooldownPickup.h">
       <Filter>Header Files\Pickup</Filter>
+    </ClInclude>
+    <ClInclude Include="HealPickup.h">
+      <Filter>Header Files\Pickup</Filter>
+    </ClInclude>
+    <ClInclude Include="SpeedPickup.h">
+      <Filter>Header Files\Pickup</Filter>
+    </ClInclude>
+    <ClInclude Include="NukePickup.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

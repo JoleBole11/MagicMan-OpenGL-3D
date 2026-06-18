@@ -30,6 +30,14 @@ void Player::handleInput(Camera* camera, btDynamicsWorld* world, std::vector<Pro
 
 	btVector3 current_vel = body->getLinearVelocity();
 
+	if (speedPowerDuration <= 0.0f) {
+		movementSpeed = 5.0f;
+	}
+	else {
+		movementSpeed = 8.0f;
+		speedPowerDuration -= delta_time;
+	}
+
 	btVector3 new_vel(
 		dir.x * movementSpeed,
 		current_vel.y(),
@@ -183,6 +191,11 @@ void Player::setFireCooldown(float cooldown)
 void Player::activateCooldownPower()
 {
 	cooldownPowerDuration = 6.0f;
+}
+
+void Player::activateSpeedPower()
+{
+	speedPowerDuration = 6.0f;
 }
 
 bool Player::getIsAlive()
