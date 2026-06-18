@@ -71,7 +71,6 @@ void GameScene::initialize() {
 	playerRb->get_body()->forceActivationState(DISABLE_DEACTIVATION);
 	playerRb->get_body()->setUserPointer(new PhysicsType{ ObjectType::PLAYER, player.get()});
 
-
 	playerHands = std::make_unique<GameObject>("PlayerHands");
 	playerHands->add_component<MeshRenderer>("models/Player/Hands.obj");
 	playerHands->get_component<Transform>()->position = playerTransform->position + glm::vec3(0, 1.2f, 0);
@@ -644,7 +643,7 @@ void GameScene::update(float dt) {
 	if(spawnTime > 0)
 		spawnTime -= dt;
 	else {
-		spawnTime = 8.0f;
+		spawnTime = 10.0f;
 		spawnEnemies();
 	}
 
@@ -830,7 +829,6 @@ void GameScene::render3d() {
 	for (auto& enemy : enemies) {
 		enemy->render();
 	}
-	map->render();
 	player->render();
 
 	glColor4f(1, 1, 1, 1);
@@ -847,7 +845,10 @@ void GameScene::render3d() {
 	
 	playerHands->render();
 
-	world->debugDrawWorld();
+	glColor4f(1, 1, 1, 1);
+	map->render();
+
+	//world->debugDrawWorld();
 
 	glPopMatrix();
 
