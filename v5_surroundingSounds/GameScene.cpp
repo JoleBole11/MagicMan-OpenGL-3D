@@ -122,6 +122,8 @@ void GameScene::initialize() {
 
 				btBoxShape* shape = new btBoxShape(btVector3(0.5f, 5.0f, 0.5f));
 				tree->add_component<RigidBody>(0.0f, shape, world);
+				world->removeRigidBody(tree->get_component<RigidBody>()->get_body());
+				world->addRigidBody(tree->get_component<RigidBody>()->get_body(), CG_DEFAULT, CG_ENEMY | CG_PICKUP | CG_PLAYER | CG_PROJECTILE);
 				trees.push_back(tree);
 			}
 		}
@@ -131,12 +133,16 @@ void GameScene::initialize() {
 	auto* shape1 = new btBoxShape(btVector3(0.1f, 5.0f, 70.0f));
 	invisibleWall->get_component<Transform>()->position = glm::vec3(-30.0f, 0.0f, 35.0f);
 	invisibleWall->add_component<RigidBody>(0.0f, shape1, world);
+	world->removeRigidBody(invisibleWall->get_component<RigidBody>()->get_body());
+	world->addRigidBody(invisibleWall->get_component<RigidBody>()->get_body(), CG_DEFAULT, CG_ENEMY | CG_PICKUP | CG_PLAYER | CG_PROJECTILE);
 	invisibleWalls.push_back(invisibleWall);
 
 	auto* invisibleWall1 = new GameObject("InvisibleWall");
 	auto* shape2 = new btBoxShape(btVector3(0.1f, 5.0f, 70.0f));
 	invisibleWall1->get_component<Transform>()->position = glm::vec3(55.0f, 0.0f, 35.0f);
 	invisibleWall1->add_component<RigidBody>(0.0f, shape2, world);
+	world->removeRigidBody(invisibleWall1->get_component<RigidBody>()->get_body());
+	world->addRigidBody(invisibleWall1->get_component<RigidBody>()->get_body(), CG_DEFAULT, CG_ENEMY | CG_PICKUP | CG_PLAYER | CG_PROJECTILE);
 	invisibleWalls.push_back(invisibleWall1);
 
 	auto* invisibleWall2 = new GameObject("InvisibleWall");
@@ -144,6 +150,8 @@ void GameScene::initialize() {
 	invisibleWall2->get_component<Transform>()->setRotationDegrees(0, 90, 0);
 	auto* shape3 = new btBoxShape(btVector3(0.1f, 5.0f, 70.0f));
 	invisibleWall2->add_component<RigidBody>(0.0f, shape3, world);
+	world->removeRigidBody(invisibleWall2->get_component<RigidBody>()->get_body());
+	world->addRigidBody(invisibleWall2->get_component<RigidBody>()->get_body(), CG_DEFAULT, CG_ENEMY | CG_PICKUP | CG_PLAYER | CG_PROJECTILE);
 	invisibleWalls.push_back(invisibleWall2);
 
 	auto* invisibleWall3 = new GameObject("InvisibleWall");
@@ -151,6 +159,8 @@ void GameScene::initialize() {
 	invisibleWall3->get_component<Transform>()->position = glm::vec3(0.0f, 0.0f, 55.0f);
 	invisibleWall3->get_component<Transform>()->setRotationDegrees(0, 90, 0);
 	invisibleWall3->add_component<RigidBody>(0.0f, shape4, world);
+	world->removeRigidBody(invisibleWall3->get_component<RigidBody>()->get_body());
+	world->addRigidBody(invisibleWall3->get_component<RigidBody>()->get_body(), CG_DEFAULT, CG_ENEMY | CG_PICKUP | CG_PLAYER | CG_PROJECTILE);
 	invisibleWalls.push_back(invisibleWall3);
 
 	map = std::make_unique<GameObject>("Map");
