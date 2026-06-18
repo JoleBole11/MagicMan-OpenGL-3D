@@ -47,7 +47,10 @@ class GameScene : public Scene
 private:
 	float delta_time = 0;
 	float previous_time = 0;
-	float spawnTime = 7.5f;
+	float spawnTime = 8.0f;
+
+	float roundTimer = 16.1f;
+	int round = 1;
 
 	int score = 0;
 	int randomNum = 0;
@@ -104,6 +107,8 @@ public:
 	void spawnProjectile();
 	void enemySpawner(const glm::vec3& pos);
 	void spawnEnemy(const glm::vec3& pos);
+	void spawnHeavyEnemy(const glm::vec3& pos);
+	void spawnEnemies();
 	void dropPickup(const glm::vec3& pos);
 	void nukeEnemies();
 

@@ -1,12 +1,26 @@
 #pragma once
 #include "Mesh.h"
 #include "Component.h"
+#include <unordered_map>
 
 class MeshRenderer : public Component {
     std::vector<Mesh> meshes;
+
+    static std::unordered_map<std::string, std::vector<Mesh>>& get_cache() {
+        static std::unordered_map<std::string, std::vector<Mesh>> cache;
+        return cache;
+    }
 public:
     MeshRenderer(const std::string& path) {
-        meshes = load_meshes(path);
+        auto& cache = get_cache();
+        auto it = cache.find(path);
+        if (it != cache.end()) {
+            meshes = it->second;
+        }
+        else {
+            meshes = load_meshes(path);
+            cache[path] = meshes;
+        }
     }
 
     void init() override {};

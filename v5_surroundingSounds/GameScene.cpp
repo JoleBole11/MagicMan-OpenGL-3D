@@ -5,8 +5,9 @@ std::mt19937 mt(time(nullptr));
 std::uniform_real_distribution<float> scaleDist(0.9f, 1.2f);
 std::uniform_real_distribution<float> offsetDist(-2.0f, 2.0f);
 std::uniform_real_distribution<float> rotationDist(0.0f, 360.0f);
-std::uniform_int_distribution<int> pickupChanceDist(1, 6);
+std::uniform_int_distribution<int> pickupChanceDist(1, 4);
 std::uniform_int_distribution<int> pickupTypeDist(1, 9);
+std::uniform_int_distribution<int> enemySpawnDist(1, 8);
 
 GameScene::GameScene() : Scene("Game")
 {
@@ -41,9 +42,6 @@ void GameScene::initialize() {
 	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
 	glEnable(GL_NORMALIZE);
-
-	
-	
 
 	int randomDrop = 1;
 
@@ -165,6 +163,8 @@ void GameScene::initialize() {
 	enemySpawner(glm::vec3(20, 0.5f, -20));
 	enemySpawner(glm::vec3(-20, 0.5f, 20));
 	enemySpawner(glm::vec3(-20, 0.5f, -20));
+	enemySpawner(glm::vec3(-0, 0.5f, 20));
+	enemySpawner(glm::vec3(-0, 0.5f, -20));
 
 	magicImg = std::make_unique<GameObject>("Sprite");
 	magicImg->add_component<Sprite>("sprites/magic.png");
@@ -223,68 +223,93 @@ void GameScene::enemySpawner(const glm::vec3& pos)
 
 void GameScene::spawnEnemy(const glm::vec3& pos)
 {
-	randomNum = (rand() % 6) + 1;
+	auto* enemy = new BasicEnemy("Enemy");
+	auto* enemyShape = new btBoxShape(btVector3(1, 1, 1));
+	enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
+	enemy->get_component<Transform>()->position = pos;
+	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+	enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
+	enemy->get_component<Transform>()->scale = glm::vec3(0.5f, 0.5f, 0.5f);
+	
+	PhysicsType* type = new PhysicsType{
+	ObjectType::ENEMY,
+	enemy
+	};
+	
+	enemy->get_component<RigidBody>()->get_body()->setUserPointer(type);
+	
+	enemy->setPlayer(player.get());
+	enemies.push_back(enemy);
+}
 
-	if (randomNum <= 5) {
-		auto* enemy = new BasicEnemy("Enemy");
-		auto* enemyShape = new btBoxShape(btVector3(1, 1, 1));
-		enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
-		enemy->get_component<Transform>()->position = pos;
-		enemy->add_component<RigidBody>(10.0f, enemyShape, world);
-		enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
-		enemy->get_component<Transform>()->scale = glm::vec3(0.5f, 0.5f, 0.5f);
+void GameScene::spawnHeavyEnemy(const glm::vec3& pos)
+{
+	auto* enemy = new HeavyEnemy("Enemy");
+	auto* enemyShape = new btBoxShape(btVector3(1, 1, 1));
+	enemy->add_component<MeshRenderer>("models/enemies/heavyEnemy.obj");
+	enemy->get_component<Transform>()->position = pos;
+	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+	enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
+	enemy->get_component<Transform>()->scale = glm::vec3(0.7f, 0.5f, 0.7f);
 
-		PhysicsType* type = new PhysicsType{
-		ObjectType::ENEMY,
-		enemy
-		};
+	PhysicsType* type = new PhysicsType{
+	ObjectType::ENEMY,
+	enemy
+	};
 
-		enemy->get_component<RigidBody>()->get_body()->setUserPointer(type);
+	enemy->get_component<RigidBody>()->get_body()->setUserPointer(type);
 
-		enemy->setPlayer(player.get());
-		enemies.push_back(enemy);
-	}
-	else {
-		auto* enemy = new HeavyEnemy("Enemy");
-		auto* enemyShape = new btBoxShape(btVector3(1, 1, 1));
-		enemy->add_component<MeshRenderer>("models/enemies/heavyEnemy.obj");
-		enemy->get_component<Transform>()->position = pos;
-		enemy->add_component<RigidBody>(10.0f, enemyShape, world);
-		enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
-		enemy->get_component<Transform>()->scale = glm::vec3(0.7f, 0.5f, 0.7f);
+	enemy->setPlayer(player.get());
+	enemies.push_back(enemy);
+}
 
-		PhysicsType* type = new PhysicsType{
-		ObjectType::ENEMY,
-		enemy
-		};
-
-		enemy->get_component<RigidBody>()->get_body()->setUserPointer(type);
-
-		enemy->setPlayer(player.get());
-		enemies.push_back(enemy);
+void GameScene::spawnEnemies()
+{
+	switch (round)
+	{
+	case 1:
+		for (int i = 0; i < 2; i++) {
+			spawnEnemy(enemySpawns[i]->get_component<Transform>()->position);
+		}
+		break;
+	case 2:
+		for (int i = 0; i < 4; i++) {
+			spawnEnemy(enemySpawns[i]->get_component<Transform>()->position);
+		}
+		break;
+	case 3:
+		for (int i = 0; i < 3; i++) {
+			spawnEnemy(enemySpawns[i]->get_component<Transform>()->position);
+		}
+		spawnHeavyEnemy(enemySpawns[3]->get_component<Transform>()->position);
+		break;
+	case 4:
+		for (int i = 0; i < 3; i++) {
+			spawnEnemy(enemySpawns[i]->get_component<Transform>()->position);
+		}
+		for (int i = 3; i < 5; i++) {
+			spawnHeavyEnemy(enemySpawns[i]->get_component<Transform>()->position);
+		}
+		break;
+	case 5:
+		for (int i = 0; i < 4; i++) {
+			spawnEnemy(enemySpawns[i]->get_component<Transform>()->position);
+		}
+		for (int i = 4; i < 6; i++) {
+			spawnHeavyEnemy(enemySpawns[i]->get_component<Transform>()->position);
+		}
+	default:
+		break;
 	}
 }
 
 void GameScene::dropPickup(const glm::vec3& pos)
 {
 	dropChance = pickupChanceDist(mt);
-	if (dropChance) {
+	if (dropChance == 3) {
 		dropType = pickupTypeDist(mt);
-		NukePickup* pickup = new NukePickup("cooldownPickup");
-		pickup->add_component<MeshRenderer>("models/Pickups/nuke.obj");
-		btBoxShape* pickupBox = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
-		Transform* pickupT = pickup->get_component<Transform>();
-		pickupT->position = glm::vec3(pos.x, 1.5f, pos.z);
-		pickupT->scale = glm::vec3(0.7f, 0.7f, 0.7f);
-		pickupT->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 0, 0));
-
-		pickup->add_component<RigidBody>(0.0f, pickupBox, world);
-		btRigidBody* pickupBody = pickup->get_component<RigidBody>()->get_body();
-		pickup->get_component<RigidBody>()->get_body()->setUserPointer(new PhysicsType{ ObjectType::PICKUP, pickup });
-		pickups.push_back(pickup);
-		/*if (dropType <= 3) {
-			dropType = pickupTypeDist(mt);
-			SpeedPickup* pickup = new SpeedPickup("cooldownPickup");
+		if (dropType <= 3) {
+			SpeedPickup* pickup = new SpeedPickup("speedPickup");
 			pickup->add_component<MeshRenderer>("models/Pickups/coke.obj");
 			btBoxShape* pickupBox = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
 			Transform* pickupT = pickup->get_component<Transform>();
@@ -298,7 +323,7 @@ void GameScene::dropPickup(const glm::vec3& pos)
 			pickups.push_back(pickup);
 		}
 		else if (dropType <= 6) {
-			HealPickup* pickup = new HealPickup("cooldownPickup");
+			HealPickup* pickup = new HealPickup("healthPickup");
 			pickup->add_component<MeshRenderer>("models/Pickups/medkit.obj");
 			btBoxShape* pickupBox = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
 			Transform* pickupT = pickup->get_component<Transform>();
@@ -326,8 +351,7 @@ void GameScene::dropPickup(const glm::vec3& pos)
 			pickups.push_back(pickup);
 		}
 		else {
-			dropType = pickupTypeDist(mt);
-			NukePickup* pickup = new NukePickup("cooldownPickup");
+			NukePickup* pickup = new NukePickup("nukePickup");
 			pickup->add_component<MeshRenderer>("models/Pickups/nuke.obj");
 			btBoxShape* pickupBox = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
 			Transform* pickupT = pickup->get_component<Transform>();
@@ -339,7 +363,7 @@ void GameScene::dropPickup(const glm::vec3& pos)
 			btRigidBody* pickupBody = pickup->get_component<RigidBody>()->get_body();
 			pickup->get_component<RigidBody>()->get_body()->setUserPointer(new PhysicsType{ ObjectType::PICKUP, pickup });
 			pickups.push_back(pickup);
-		}*/
+		}
 	}
 }
 
@@ -569,13 +593,19 @@ void GameScene::update(float dt) {
 	if (Input::get_key_down('E'))
 		Input::set_cursor_lock(is_cursor_locked = !is_cursor_locked);
 
+	if (roundTimer > 0 && round != 5) {
+		roundTimer -= dt;
+	}
+	else if (roundTimer <= 0) {
+		roundTimer = 24.0f;
+		round++;
+	}
+
 	if(spawnTime > 0)
 		spawnTime -= dt;
 	else {
-		spawnTime = 7.5f;
-		for (auto& spawn : enemySpawns) {
-			spawnEnemy(spawn->get_component<Transform>()->position);
-		}
+		spawnTime = 8.0f;
+		spawnEnemies();
 	}
 
 	for (auto& tree : trees) {
