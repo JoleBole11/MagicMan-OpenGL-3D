@@ -172,6 +172,7 @@
   <ItemGroup>
     <ClInclude Include="BasicEnemy.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CollisionGroup.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ConeRenderer.h" />
     <ClInclude Include="CooldownPickup.h" />

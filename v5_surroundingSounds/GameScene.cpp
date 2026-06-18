@@ -65,9 +65,12 @@ void GameScene::initialize() {
 	playerTransform->position = glm::vec3(3, 0.5f, 3);
 	player->add_component<RigidBody>(1.0f, playerShape, world);
 	playerRb = player->get_component<RigidBody>();
+	world->removeRigidBody(playerRb->get_body());
+	world->addRigidBody(playerRb->get_body(), CG_PLAYER, CG_ENEMY | CG_PICKUP | CG_DEFAULT);
 	playerRb->get_body()->setAngularFactor(btVector3(0, 0, 0));
 	playerRb->get_body()->forceActivationState(DISABLE_DEACTIVATION);
 	playerRb->get_body()->setUserPointer(new PhysicsType{ ObjectType::PLAYER, player.get()});
+
 
 	playerHands = std::make_unique<GameObject>("PlayerHands");
 	playerHands->add_component<MeshRenderer>("models/Player/Hands.obj");
@@ -158,6 +161,8 @@ void GameScene::initialize() {
 	t->scale = glm::vec3(0.7f, 1.0f, 0.7f);
 	auto* shape = new btBoxShape(btVector3(70, 0.1f, 70));
 	map->add_component<RigidBody>(0.0f, shape, world);
+	world->removeRigidBody(map->get_component<RigidBody>()->get_body());
+	world->addRigidBody(map->get_component<RigidBody>()->get_body(), CG_DEFAULT, CG_ENEMY | CG_DEFAULT | CG_PLAYER | CG_PROJECTILE);
 
 	enemySpawner(glm::vec3(20, 0.5f, 20));
 	enemySpawner(glm::vec3(20, 0.5f, -20));
@@ -228,6 +233,9 @@ void GameScene::spawnEnemy(const glm::vec3& pos)
 	enemy->add_component<MeshRenderer>("models/enemies/basicEnemy.obj");
 	enemy->get_component<Transform>()->position = pos;
 	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+	auto* rb = enemy->get_component<RigidBody>()->get_body();
+	world->removeRigidBody(rb);
+	world->addRigidBody(rb, CG_ENEMY, CG_PLAYER | CG_PROJECTILE | CG_DEFAULT);
 	enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
 	enemy->get_component<Transform>()->scale = glm::vec3(0.5f, 0.5f, 0.5f);
 	
@@ -249,6 +257,9 @@ void GameScene::spawnHeavyEnemy(const glm::vec3& pos)
 	enemy->add_component<MeshRenderer>("models/enemies/heavyEnemy.obj");
 	enemy->get_component<Transform>()->position = pos;
 	enemy->add_component<RigidBody>(10.0f, enemyShape, world);
+	auto* rb = enemy->get_component<RigidBody>()->get_body();
+	world->removeRigidBody(rb);
+	world->addRigidBody(rb, CG_ENEMY, CG_PLAYER | CG_PROJECTILE | CG_DEFAULT);
 	enemy->get_component<RigidBody>()->get_body()->setAngularFactor(btVector3(0, 0, 0));
 	enemy->get_component<Transform>()->scale = glm::vec3(0.7f, 0.5f, 0.7f);
 
@@ -318,6 +329,9 @@ void GameScene::dropPickup(const glm::vec3& pos)
 			pickupT->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 0, 0));
 
 			pickup->add_component<RigidBody>(0.0f, pickupBox, world);
+			auto* rb = pickup->get_component<RigidBody>()->get_body();
+			world->removeRigidBody(rb);
+			world->addRigidBody(rb, CG_PICKUP, CG_PLAYER);
 			btRigidBody* pickupBody = pickup->get_component<RigidBody>()->get_body();
 			pickup->get_component<RigidBody>()->get_body()->setUserPointer(new PhysicsType{ ObjectType::PICKUP, pickup });
 			pickups.push_back(pickup);
@@ -332,6 +346,9 @@ void GameScene::dropPickup(const glm::vec3& pos)
 			pickupT->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 0, 0));
 
 			pickup->add_component<RigidBody>(0.0f, pickupBox, world);
+			auto* rb = pickup->get_component<RigidBody>()->get_body();
+			world->removeRigidBody(rb);
+			world->addRigidBody(rb, CG_PICKUP, CG_PLAYER);
 			btRigidBody* pickupBody = pickup->get_component<RigidBody>()->get_body();
 			pickup->get_component<RigidBody>()->get_body()->setUserPointer(new PhysicsType{ ObjectType::PICKUP, pickup });
 			pickups.push_back(pickup);
@@ -346,6 +363,9 @@ void GameScene::dropPickup(const glm::vec3& pos)
 			pickupT->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 0, 0));
 
 			pickup->add_component<RigidBody>(0.0f, pickupBox, world);
+			auto* rb = pickup->get_component<RigidBody>()->get_body();
+			world->removeRigidBody(rb);
+			world->addRigidBody(rb, CG_PICKUP, CG_PLAYER);
 			btRigidBody* pickupBody = pickup->get_component<RigidBody>()->get_body();
 			pickup->get_component<RigidBody>()->get_body()->setUserPointer(new PhysicsType{ ObjectType::PICKUP, pickup });
 			pickups.push_back(pickup);
@@ -360,6 +380,9 @@ void GameScene::dropPickup(const glm::vec3& pos)
 			pickupT->rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 0, 0));
 
 			pickup->add_component<RigidBody>(0.0f, pickupBox, world);
+			auto* rb = pickup->get_component<RigidBody>()->get_body();
+			world->removeRigidBody(rb);
+			world->addRigidBody(rb, CG_PICKUP, CG_PLAYER);
 			btRigidBody* pickupBody = pickup->get_component<RigidBody>()->get_body();
 			pickup->get_component<RigidBody>()->get_body()->setUserPointer(new PhysicsType{ ObjectType::PICKUP, pickup });
 			pickups.push_back(pickup);
@@ -395,6 +418,8 @@ void GameScene::spawnProjectile()
 		tp->scale = glm::vec3(0.25f, 0.25f, 0.25f);
 		projectileShape = new btSphereShape(0.25f);
 		projectile->add_component<RigidBody>(0.1f, projectileShape, world);
+		world->removeRigidBody(projectile->get_component<RigidBody>()->get_body());
+		world->addRigidBody(projectile->get_component<RigidBody>()->get_body(), CG_PROJECTILE, CG_ENEMY | CG_DEFAULT);
 
 		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
 
@@ -417,6 +442,8 @@ void GameScene::spawnProjectile()
 		tp->scale = glm::vec3(0.25f, 0.25f, 0.25f);
 		projectileShape = new btSphereShape(0.25f);
 		projectile->add_component<RigidBody>(0.1f, projectileShape, world);
+		world->removeRigidBody(projectile->get_component<RigidBody>()->get_body());
+		world->addRigidBody(projectile->get_component<RigidBody>()->get_body(), CG_PROJECTILE, CG_ENEMY | CG_DEFAULT);
 
 		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
 
@@ -439,6 +466,8 @@ void GameScene::spawnProjectile()
 		tp->scale = glm::vec3(0.25f, 0.25f, 0.25f);
 		projectileShape = new btSphereShape(0.25f);
 		projectile->add_component<RigidBody>(0.1f, projectileShape, world);
+		world->removeRigidBody(projectile->get_component<RigidBody>()->get_body());
+		world->addRigidBody(projectile->get_component<RigidBody>()->get_body(), CG_PROJECTILE, CG_ENEMY | CG_DEFAULT);
 
 		projectile->get_component<RigidBody>()->get_body()->setLinearVelocity(velocity);
 
@@ -498,6 +527,7 @@ void GameScene::update_physics(float delta_time) {
 				
 				break;
 			case ObjectType::ENEMY:
+
 				if (dataB->type == ObjectType::PROJECTILE) {
 					Enemy* enemy = static_cast<Enemy*>(dataA->object);
 					Projectile* projectile = static_cast<Projectile*>(dataB->object);

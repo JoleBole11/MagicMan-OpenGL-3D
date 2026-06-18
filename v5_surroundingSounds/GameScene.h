@@ -20,6 +20,7 @@
 #include "HealPickup.h"
 #include "SpeedPickup.h"
 #include "NukePickup.h"
+#include "CollisionGroup.h"
 
 #include <random>
 #include <chrono>
