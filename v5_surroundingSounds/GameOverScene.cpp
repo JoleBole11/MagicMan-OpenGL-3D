@@ -33,7 +33,7 @@ void GameOverScene::initialize()
     continueText = std::make_unique<GameObject>("continueText");
     continueText->add_component<Text>(
         shared_font.get(),
-        "Press LMB to go back to Menu",
+        "Press RMB to go back to Menu",
         glm::vec3(1.0f, 0.84f, 0.0f)
     );
     continueText->get_component<Transform>()->position = glm::vec3(250.0f, 500.0f, 0.0f);
@@ -49,7 +49,7 @@ void GameOverScene::initialize()
 
 void GameOverScene::update(float deltaTime)
 {
-    if (Input::get_mouse_button_down(0)) {
+    if (Input::get_mouse_button_down(2)) {
         SceneManager::getInstance()->changeScene("Menu");
     }
     if (Input::get_key_down('r')) {

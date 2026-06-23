@@ -154,7 +154,7 @@
       <Filter>Source Files\Pickup</Filter>
     </ClCompile>
     <ClCompile Include="NukePickup.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Pickup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -287,8 +287,11 @@
     <ClInclude Include="SpeedPickup.h">
       <Filter>Header Files\Pickup</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionGroup.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
     <ClInclude Include="NukePickup.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Pickup</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

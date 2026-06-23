@@ -44,6 +44,8 @@ void GameScene::initialize() {
 	glEnable(GL_NORMALIZE);
 
 	int randomDrop = 1;
+	round = 1;
+	roundTimer = 16.1f;
 
 	SoundManager::get_instance().playSong(SoundManager::get_instance().gameplaySong);
 
@@ -960,4 +962,5 @@ void GameScene::onEnter()
 void GameScene::onExit()
 {
 	cleanup();
+	Input::set_cursor_lock(is_cursor_locked = false);
 }

@@ -45,6 +45,10 @@ public:
         if (!create_sound("sounds/FreezeHit.mp3", FMOD_DEFAULT | FMOD_3D, &freezeHitSound)) return false;
         if (!create_sound("sounds/MagicHit.mp3", FMOD_DEFAULT | FMOD_3D, &magicHitSound)) return false;
         if (!create_sound("sounds/PlayerHit.mp3", FMOD_DEFAULT | FMOD_3D, &playerHitSound)) return false;
+        if (!create_sound("sounds/speedPickup.mp3", FMOD_DEFAULT | FMOD_3D, &speedPickupSound)) return false;
+        if (!create_sound("sounds/healPickup.mp3", FMOD_DEFAULT | FMOD_3D, &healPickupSound)) return false;
+        if (!create_sound("sounds/cooldownPickup.mp3", FMOD_DEFAULT | FMOD_3D, &cooldownPickupSound)) return false;
+        if (!create_sound("sounds/nukePickup.mp3", FMOD_DEFAULT | FMOD_3D, &nukePickupSound)) return false;
         if (!create_sound("sounds/Gameplay.mp3", FMOD_LOOP_NORMAL | FMOD_2D, &gameplaySong)) return false;
         if (!create_sound("sounds/MainMenu.mp3", FMOD_LOOP_NORMAL | FMOD_2D, &mainMenuSong)) return false;
 
@@ -60,6 +64,10 @@ public:
         if (freezeHitSound) freezeHitSound->release();
         if (magicHitSound) magicHitSound->release();
         if (playerHitSound) playerHitSound->release();
+        if (speedPickupSound) speedPickupSound->release();
+        if (healPickupSound) healPickupSound->release();
+        if (cooldownPickupSound) cooldownPickupSound->release();
+        if (nukePickupSound) nukePickupSound->release();
         if (gameplaySong) gameplaySong->release();
         if (mainMenuSong) mainMenuSong->release();
 
@@ -124,6 +132,10 @@ public:
     FMOD::Sound* freezeHitSound = nullptr;
     FMOD::Sound* magicHitSound = nullptr;
     FMOD::Sound* playerHitSound = nullptr;
+    FMOD::Sound* speedPickupSound = nullptr;
+    FMOD::Sound* healPickupSound = nullptr;
+    FMOD::Sound* cooldownPickupSound = nullptr;
+    FMOD::Sound* nukePickupSound = nullptr;
     FMOD::Sound* gameplaySong = nullptr;
     FMOD::Sound* mainMenuSong = nullptr;
 private:
